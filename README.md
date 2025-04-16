@@ -34,3 +34,4 @@ bash run_test.sh
 ```
 
 
+git commit -m "Your commit message"
