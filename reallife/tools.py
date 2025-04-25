@@ -1,0 +1,1 @@
+# source ~/.bash_profile ;cd /Users/zhaoxuefeng/GitHub/aiworker; .venv/bin/python script/kanban_manager_add_tips.py
