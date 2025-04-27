@@ -1,8 +1,3 @@
-"""
-执行池添加到日历
-不要使用环境变量配置
-"""
-
 import os
 import re
 from typing import Optional
@@ -59,6 +54,25 @@ def parse_execution_pool(text: str) -> Optional[str]:
     else:
         logging.warning("未找到匹配的执行池内容")
         return None
+# 正则解析相关
+def parse_execution_jiangyou_pool(text: str) -> Optional[str]:
+    """
+    使用正则表达式解析 "执行池" 内容
+    :param text: 输入文本
+    :return: 解析后的执行池内容
+    """
+    pattern = r'## 酱油池\n(.+?)\n##'
+    match = re.search(pattern, text, re.DOTALL)
+    if match:
+        content = match.group(1).strip()
+        formatted_content = '\n'.join([line.strip() for line in content.split('\n') if line.strip()])
+        return formatted_content
+    else:
+        logging.warning("未找到匹配的执行池内容")
+        return None
+    
+
+
 from datetime import datetime
 
 
@@ -109,29 +123,15 @@ def generate_schedule(text: str,habit: str="") -> str:
     completion = llm.complete(prompt)
     return completion.text if completion else ''
 
-# 主程序入口
-def main():
-    # 参数配置
-    obsidian = "/Users/zhaoxuefeng/GitHub/obsidian"
-    file_path = f"{obsidian}/工作/事件看板/事件看板.md"
 
-    # 读取文件
-    text = read_file(file_path)
 
-    if not text:
-        logging.error("文件内容为空，无法解析执行池")
-        return
 
-    # 解析执行池
-    execution_pool = parse_execution_pool(text)
 
-    if execution_pool:
-        logging.debug("解析到的执行池内容:\n{}".format(execution_pool))
-        # 生成日程安排
-        schedule_result = generate_schedule(execution_pool,habit ="7点-9点起床洗漱, 12点到14点吃饭+午休,19点以后就是自由时间")
-        print(schedule_result)
-    else:
-        logging.error("未能解析到执行池内容")
 
-if __name__ == "__main__":
-    main()
+
+
+
+
+
+
+

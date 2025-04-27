@@ -14,8 +14,10 @@ class Date:
         if not hasattr(self, 'initialized'):
             self.initialized = True
             # self.date = datetime.today().strftime("%Y-%m-%d")
-            self.date = '2025-02-12'
-            self.time = datetime.today().strftime("%H:%M:%S")
+            # self.time = datetime.today().strftime("%H:%M:%S")
+            self.date = '2025-02-09'
+            self.time = '10:10:10'
+            
 
 def status(task:str,date:str,run_only = False):
     """执行任务并记录执行状态, 如果已经执行了则不再执行(每日)
