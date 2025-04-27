@@ -1,18 +1,12 @@
-from reallife.status.utils import status, push_task
 
-from .utils import status, Date
+from reallife2.utils.manager_utils import status, Date
 date_c = Date()
 date = date_c.date
 time = date_c.time
 # 同步预备池
 
-from reallife.status.news import sync_news_func
-from reallife.status.notes import sync_notes_function
-from reallife.status.cal import sync_calulate_func
-import requests
 from grapherz.canvas.core import Canvas,Color
 from kanban.core import Pool,Kanban
-
 
 
 def encode(i,project_name):

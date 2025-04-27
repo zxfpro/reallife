@@ -1,13 +1,16 @@
 [project]
 name = "reallife"
-version = "0.1.1"
+version = "0.1.2"
 description = "开始, 便捷使用的代码化"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "grapherz>=0.1.5",
     "kanbanz>=0.2.0",
+    "numpy>=2.2.5",
+    "pandas>=2.2.3",
     "pytest>=8.3.5",
     "pytest-html>=4.1.1",
+    "pyyaml>=6.0.2",
     "toolsz>=0.1.5",
 ]

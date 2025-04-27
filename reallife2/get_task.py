@@ -1,15 +1,14 @@
-from .status.utils import push_task,Date
+from .utils.manager_utils import Date,push_task
 date_c = Date()
 date = date_c.date
-from .status.info import *
-from .status.action import *
 
 from datetime import datetime
 
-from reallife2.tasks.evening_task import evening,close
-from reallife2.tasks.morning_task import morning
-from reallife2.tasks.run_task import tasks
-from reallife2.tasks.start_task import start
+from .tasks.evening_task import evening,close
+from .tasks.morning_task import morning
+from .tasks.run_task import tasks
+from .tasks.start_task import start
+
 
 debug = True
 

@@ -1,6 +1,5 @@
-from reallife.status.utils import status, push_task
+from reallife2.utils.manager_utils import status, Date
 
-from .utils import status, Date
 date_c = Date()
 date = date_c.date
 time = date_c.time

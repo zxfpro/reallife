@@ -1,11 +1,22 @@
-from .status.utils import push_task,Date
-date_c = Date()
-date = date_c.date
-from .status.info import *
-from .status.action import *
+from reallife2.event.tips.start import ding_morning, change_frist
+
+from reallife2.event.action.work import sync_ready_pool, sync_order_pool, sync_run_pool
+from reallife2.event.action.notes import sync_note, sync_news
+from reallife2.event.action.weight import sync_weight
+from reallife2.event.action.cals import sync_calulate_func
+
+def check_(func):
+    result = func()
+    if result:
+        return result
+    
+def check_action_(func,debug=True):
+    result = func()
+    if result and debug:
+        print('_____')
 
 
-def start():
+def start(debug=True):
 
     # 同步预备池   sync_ready_pool
     # 同步就绪池   sync_order_pool
@@ -16,11 +27,8 @@ def start():
     # 同步备忘录   sync_note
     # bulid知识库
 
-    result = ding_morning()
-    if result:
-        if debug:
-            print('ding_morning')
-        return result
+    check_(ding_morning)
+
     
     result = sync_ready_pool()
     if result and debug:
@@ -30,11 +38,9 @@ def start():
     if result and debug:
         print('sync_order_pool')
     
-    result = change_frist()
-    if result:
-        if debug:
-            print('change_frist')
-        return result
+    check_(change_frist)
+
+
 
     result = sync_run_pool()
     if result and debug:
@@ -50,9 +56,9 @@ def start():
     #     print('sync_news')
 
 
-    result = sync_calulate()
+    result = sync_calulate_func()
     if result and debug:
-        print('sync_calulate')
+        print('sync_calulate_func')
 
     result = sync_note()
     if result and debug:

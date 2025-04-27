@@ -1,10 +1,11 @@
-from reallife2.event
-
+from reallife2.event.tips.evening import clean_cat_ning,clean_ning,exercise,sleep
+from reallife2.event.tips.close import ding_evening,git_push_check
 
 def check_(func):
     result = func()
     if result:
         return result
+
 
 
 def close():

@@ -1381,13 +1381,16 @@ wheels = [
 
 [[package]]
 name = "reallife"
-version = "0.1.1"
+version = "0.1.2"
 source = { virtual = "." }
 dependencies = [
     { name = "grapherz" },
     { name = "kanbanz" },
+    { name = "numpy" },
+    { name = "pandas" },
     { name = "pytest" },
     { name = "pytest-html" },
+    { name = "pyyaml" },
     { name = "toolsz" },
 ]
 
@@ -1395,8 +1398,11 @@ dependencies = [
 requires-dist = [
     { name = "grapherz", specifier = ">=0.1.5" },
     { name = "kanbanz", specifier = ">=0.2.0" },
+    { name = "numpy", specifier = ">=2.2.5" },
+    { name = "pandas", specifier = ">=2.2.3" },
     { name = "pytest", specifier = ">=8.3.5" },
     { name = "pytest-html", specifier = ">=4.1.1" },
+    { name = "pyyaml", specifier = ">=6.0.2" },
     { name = "toolsz", specifier = ">=0.1.5" },
 ]
 
