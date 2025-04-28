@@ -70,13 +70,6 @@ async def reset_action(action_id: str,date: str):
 
 
 
-
-
-
-
-
-
-
 # 记录体重
 @app.post("/record/{weight}/{date}")
 async def record_weight(weight: float, date: str):
@@ -97,6 +90,8 @@ async def get_weight(date: str):
         raise HTTPException(status_code=404, detail="未找到指定日期的体重记录")
     
     return {"date": query_date, "weight": weight_records[query_date]}
+
+
 
 
 

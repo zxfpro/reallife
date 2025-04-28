@@ -1,25 +1,72 @@
-
-from reallife.utils.manager_utils import status, Date
-date_c = Date()
-date = date_c.date
-# 同步预备池
-
+""" 动作函数 """
+import subprocess
+from datetime import datetime
+from functools import lru_cache
+import requests
 from grapherz.canvas.core import Canvas,Color
 from kanban.core import Pool,Kanban
-import requests
-
 from llama_index.core import PromptTemplate
-import subprocess
-import os
-from datetime import datetime
-
 from bs4 import BeautifulSoup
-from llama_index.llms.openai import OpenAI
-from functools import lru_cache
-from reallife.utils.llm_utils import read_file, logging, parse_execution_pool, generate_schedule, parse_execution_jiangyou_pool
+from llmada import BianXieAdapter
+
+from .utils import read_file,parse_execution_pool,parse_execution_jiangyou_pool,status,Date
+
+date_c = Date()
+date = date_c.date
+
+# AI 处理相关
+def generate_schedule(text: str,habit: str="") -> str:
+    """
+    使用 GPT 模型生成日程安排
+    :param text: 输入文本
+    :return: 生成的日程安排结果
+    """
+
+    template = """
+    你是一个日程管理者, 擅长做日程安排并按照标准格式输出.
+
+    有以下几点需要注意:
+        1 **不需要输出多余内容 严格按照输出格式**.
+        2 将日常规划做到未来时间, 而不是已经过去的时间, 现在的时间为: {current_utc_time}
+        3 日常规划要避开用户习惯占用的时间
+
+    用户习惯:
+    ---
+    {habit}
+    ---
+
+    输出格式:
+    我会输入一段文字,里面包含了我今天需要做的任务的标题,以及任务预估的消耗时间(例如2P P代表一个番茄钟,也就是30分钟 2P就是60分钟)
+    任务可以拆开, 只需要保证总时间是对的.
+    我希望可以获得合理的时间安排并按照 "开始时间 结束时间 任务标题" 的格式输出,其中 "$" 是分隔符,标签以 # 开头应该去掉.
 
 
+    例子输入:
+    ---
+    - [ ] 2P 研究一下算法知识吧
+    - [ ] 2P 数据结构 #长期
+    - [ ] 4P 时间复杂度算法 #长期
+    - [ ] 4P 做一些整理和知识层面上 的游走
 
+    例子输出:
+    2月11日8:00$2月11日9:00$研究一下算法知识吧
+    2月11日9:00$2月11日10:00$数据结构
+    2月11日13:00$2月11日15:00$时间复杂度算法
+    2月11日17:00$2月11日19:00$做一些整理和知识层面上 的游走
+
+    ---
+    {text}
+    """
+    current_utc_time = str(datetime.today())[:-7]
+
+    prompt = template.format(text=text,habit=habit,current_utc_time = current_utc_time)
+
+    # 配置相关
+    llm = BianXieAdapter()
+    llm.set_model("o3-mini")
+
+    completion = llm.product(prompt)
+    return completion
 
 
 class KanBanManager():
@@ -28,7 +75,6 @@ class KanBanManager():
         self.pathlib = ["/工程系统级设计/项目级别/数字人生/模拟资质认证/模拟资质认证.canvas",
                         "/工程系统级设计/项目级别/数字人生/DigitalLife/DigitalLife.canvas",
                         "/工程系统级设计/项目级别/自动化工作/coder/coder.canvas",]
-        
 
     def _encode(self,i,project_name):
         return project_name+'-'+i
@@ -55,25 +101,24 @@ class KanBanManager():
         kanban.push()
 
         return 'success'
-    
+
     def _give_a_task_time(self,task:str)->str:
         return "2P " + task
-    
+
     def _get_weight(self,date):
         url = f"http://101.201.244.227:8000/weight/{date}"
         response = requests.get(url)
         return response.json().get('weight')
-    
+
     def sync_ready(self):
         for path in self.pathlib:
             self.toReady(canvas_path="/Users/zhaoxuefeng/GitHub/obsidian/工作"+path,
                     kanban_path =self.kanban_path)
         return 'success'
-    
+
     def sync_order(self):
         kanban = Kanban(self.kanban_path)
         kanban.pull()
-        
         tasks = kanban.get_tasks_in(Pool.预备池)
         order_tasks = kanban.get_tasks_in(Pool.就绪池)
         orders = ' '.join(order_tasks)
@@ -85,7 +130,7 @@ class KanBanManager():
 
         kanban.push()
         return 'success'
-    
+
     def sync_run(self)->str:
         kanban = Kanban(self.kanban_path)
         kanban.pull()
@@ -108,7 +153,6 @@ class KanBanManager():
     def sync_run2order(self,task):
         kanban = Kanban(self.kanban_path)
         kanban.pull()
-
         task_ = kanban.select_by_word(task)[0] # select_by_word_in
         kanban.pop(inputs=task_,by='description',pool=Pool.执行池)
         kanban.insert(text=task_,pool=Pool.就绪池)
@@ -141,11 +185,11 @@ class KanBanManager():
             kanban.insert(text=task,pool=Pool.完成池)
             kanban.push()
             return 'failed'
-            
+
         task_ = kanban.get_task_by_word(task,pool=Pool.执行池)[0]
         kanban.pop(text=task_,pool=Pool.执行池)
         kanban.insert(text=task_,pool=Pool.完成池)
-        
+
         # and
         canvas = Canvas(file_path=canvas_path)
         tasks = canvas.select_nodes_by_text(task)
@@ -178,6 +222,9 @@ class KanBanManager():
 
 
     def sync_weight(self,date)->str:
+        """
+        同步体重
+        """
         result = self._get_weight(date)
         x = f"""---
 番茄: 14
@@ -242,7 +289,9 @@ class APPIO():
     def _get_context_from_jq_url(self,url):
         # 目标网页的 URL
         headers = {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) \
+                AppleWebKit/537.36 (KHTML, like Gecko) \
+                    Chrome/91.0.4472.124 Safari/537.36"
         }
         # 发送 HTTP 请求获取网页内容
         response = requests.get(url, headers=headers)
@@ -262,13 +311,7 @@ class APPIO():
 
     @lru_cache(maxsize=100)
     def _extra_text(self,text):
-        llm = OpenAI(
-            model="gpt-4o",
-            api_key=os.getenv("BIANXIE_API_KEY"),
-            api_base='https://api.bianxieai.com/v1',
-            temperature=0.1,
-        )
-        resp = llm.complete(f"""
+        template = """
         我希望你可以对一个内容进行汇总和总结, 我会给你一段网页的内容，你来用一些简短的文字告诉我这篇内容的主要信息, 以及列出其中相关的重点和链接
 
         网页内容:
@@ -277,15 +320,22 @@ class APPIO():
         ---
 
         输出信息:
-        """)
-        return resp.text
+        """
+
+        llm = BianXieAdapter()
+        llm.set_model("gpt-4o")
+        prompt = template.format(text = text)
+        completion = llm.product(prompt)
+        return completion
 
     def _get_articlie_link(self):
         # 目标网页的 URL
         url = "https://www.jiqizhixin.com"
 
         headers = {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) \
+                AppleWebKit/537.36 (KHTML, like Gecko) \
+                    Chrome/91.0.4472.124 Safari/537.36"
         }
         # 发送 HTTP 请求获取网页内容
         # response = requests.get(url)
@@ -313,14 +363,14 @@ class APPIO():
         text = read_file(self.kanban_path)
 
         if not text:
-            logging.error("文件内容为空，无法解析执行池")
+            print("文件内容为空，无法解析执行池")
             return
 
         # 解析执行池
         execution_pool = parse_execution_pool(text)
 
         if execution_pool:
-            logging.debug("解析到的执行池内容:\n{}".format(execution_pool))
+            print(f"解析到的执行池内容:\n{execution_pool}")
             # 生成日程安排
             schedule_result = generate_schedule(execution_pool,habit =self.habit)
             xx = [i for i in schedule_result.split('\n') if i!='']
@@ -329,7 +379,7 @@ class APPIO():
                 self._update_calulate(*v)
 
         else:
-            logging.error("未能解析到执行池内容")
+            print("未能解析到执行池内容")
 
     def sync_notes(self):
         # 读取文件
@@ -344,6 +394,11 @@ class APPIO():
         self._write_notes(schedule_result)
 
     def sync_news(self,date:str):
+        """同步咨询到ob
+
+        Args:
+            date (str): 日期,字符串格式
+        """
         file_links = self._get_articlie_link()
         print(file_links,'file_links')
         article = []
@@ -360,85 +415,57 @@ class APPIO():
 
 @status(task="同步体重",date=date,run_only=True)
 def sync_weight():
+    """同步体重
+    """
     kanb = KanBanManager()
     kanb.sync_weight(date)
 
 @status(task="同步预备池",date=date,run_only=True)
 def sync_ready_pool()->str:
+    """同步预备池
+    """
     kanb = KanBanManager()
     kanb.sync_ready()
 
 @status(task="同步就绪池",date=date,run_only=True)
 def sync_order_pool()->str:
+    """同步就绪池
+    """
     kanb = KanBanManager()
     kanb.sync_order()
 
 @status(task="同步执行池",date=date,run_only=True)
 def sync_run_pool()->str:
+    """同步执行池
+    """
     kanb = KanBanManager()
     kanb.sync_run()
 
 @status(task="同步日历",date=date,run_only=True)
 def sync_calulate()->str:
+    """同步日历
+    """
     appio = APPIO()
     appio.sync_calulate()
 
 
 @status(task="同步备忘录",date=date,run_only=True)
 def sync_note()->str:
+    """同步备忘录
+    """
     appio = APPIO()
     appio.sync_notes()
 
+@status(task="同步备忘录夜",date=date,run_only=True)
+def sync_note_night()->str:
+    """同步备忘录夜
+    """
+    appio = APPIO()
+    appio.sync_notes()
 
 @status(task="收集资讯",date=date,run_only=True)
 def sync_news()->str:
+    """收集资讯
+    """
     appio = APPIO()
     appio.sync_news(date)
-
-
-
-
-# prompt = """
-# 你是一个计划构筑师,根据我的任务帮我拆分编写工作流程与计划, 使用mermaid 的方式构建.
-
-# 注意: 相对简明, mermaid格式简单,清晰
-
-# ---
-# 任务:
-# {任务}
-
-# """
-
-
-
-# import requests
-# from bs4 import BeautifulSoup
-# import os
-# # 配置相关
-# from llama_index.llms.openai import OpenAI
-
-# import requests
-# from bs4 import BeautifulSoup
-# from datetime import datetime
-
-# from functools import lru_cache
-
-
-# # 初始化 LLM 和 Embedding 模型
-# llm = OpenAI(
-#     model="gpt-4.1-2025-04-14",
-#     api_key=os.getenv("BIANXIE_API_KEY"),
-#     api_base='https://api.bianxieai.com/v1',
-#     temperature=0.1,
-# )
-# obsidian = "/Users/zhaoxuefeng/GitHub/obsidian"
-
-# def main(task:str):
-#     return llm.complete(prompt.format(任务=task))
-
-
-
-# if __name__ == "__main__":
-#     import sys
-#     multi_line_input = sys.stdin.read()
-#     print(main(multi_line_input))
