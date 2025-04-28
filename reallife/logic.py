@@ -107,7 +107,7 @@ def tasks():
         task_type = judge_type(task)
         print("task_type:",task_type)
 
-        task_type = "设计"
+        task_type = "开会与对齐"
         if task_type == "代码与练习":
             edit_coder(task)
         elif task_type == "实验与学习":

@@ -101,7 +101,7 @@ def meeting_and_talk(task:str):
     """
     # 开会与对齐
     failed_safe()
-    task_with_time(task_name = task,time=3)
+    task_with_time(task_name = task,time=60)
 
 def task_finish(task):
 
