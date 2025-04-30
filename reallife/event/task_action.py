@@ -3,8 +3,23 @@ from llmada import BianXieAdapter
 from kanban.core import Pool,Kanban
 from grapherz.canvas.core import Canvas,Color
 from promptlibz.work import JudgeType
-from .utils import failed_safe, task_with_time, get_commit_something, display_dialog
-from .action import KanBanManager
+from .utils import failed_safe, task_with_time, git_commit_something, display_dialog, get_choice_from_applescript
+from .action import KanBanManager, KANBAN_PATH, WORK_CANVAS_PATH
+
+import re
+
+def extract_type_code(text: str)->str:
+    """从文本中提取python代码
+
+    Args:
+        text (str): 输入的文本。
+
+    Returns:
+        str: 提取出的python文本
+    """
+    pattern = r'```type([\s\S]*?)```'
+    matches = re.findall(pattern, text)
+    return matches[0].replace('\n','')
 
 def judge_type(task:str):
     """判断任务类型
@@ -17,7 +32,7 @@ def judge_type(task:str):
     llm.set_model('gpt-4.1-mini')
     prompt = JudgeType.prompt.format(task=task)
     completion = llm.product(prompt)
-    return completion
+    return extract_type_code(completion)
 
 def edit_coder(task:str):
     """编写代码
@@ -28,24 +43,34 @@ def edit_coder(task:str):
 
     # 是否创建项目
     create_proj = False
-
-    if create_proj:
-        failed_safe()
+    display_dialog("编写代码",f"是否创建新项目: {task}",button_text="开始",button_cancel=False)
+    create_proj = display_dialog("编写代码",f"是否创建新项目: ",button_text="create",button_cancel=True)
+    if create_proj == 'create':
         display_dialog("创建项目","1. pypi查重 \n  2. obsidian创建Reader | Docs \n \
-                       3创建github仓库",button_text="确认")
+                       3创建github仓库",button_text="确认",button_cancel=False)
         display_dialog("创建项目","初始化 uv init and 修改解释器 \
                        mkdocs new .  update  文档推送  创建文件夹,\
                        测试文件等  \
-                       uv build publish  ",button_text="确认")
-
-
-
-    # _create_project(task)
+                       uv build publish  ",button_text="确认", button_cancel=False)
+    print(task,'task')
     # TODO
     lst = ['coderTools','grapher','kanban']
-    select = 'kanban'
+
+    get_choice_from_applescript()
+    all_options = ['coderTools','grapher','kanban','llmada','networkx','ob_ragtools','obsidian','promptlib',
+                   'pypidoctor','readerLLamaIndex','reallife','tools','aiworker']
+    choice = get_choice_from_applescript(
+        prompt_text="请选择作为工作区的仓库:",
+        list_title="工作区",
+        options=all_options,
+        default_option="kanban"
+    )
+    if choice:
+        select = choice
+    else:
+        select = None
+        raise Exception('选择失效')
     #
-    failed_safe()
     display_dialog("编码与练习","基础逻辑",button_text="确认")
     task_with_time(task_name = task,time=40)
     display_dialog("编码与练习","测试与测试用例",button_text="确认")
@@ -55,7 +80,8 @@ def edit_coder(task:str):
     display_dialog("编码与练习","环境与推送新版本",button_text="确认")
     task_with_time(task_name = task,time=10)
     # 仓库$编写目标
-    get_commit_something(select,task)
+    git_commit_something(select,task)
+    failed_safe()
 
 def test_and_study(task:str):
     """实验与学习
@@ -64,14 +90,10 @@ def test_and_study(task:str):
         task (str): 任务
     """
     # 实验与学习
-
-    failed_safe()
-
-    display_dialog("实验与学习",f"请打开飞书会议, 标题为{task}",button_text="确认")
+    display_dialog("实验与学习",f"请打开飞书会议, 标题为{task}",button_text="确认",button_cancel=False)
     task_with_time(task_name = task,time=60)
-    display_dialog("实验与学习","实验记录 + 录屏 + 存根",button_text="确认")
-    display_dialog("实验与学习","录音 + 微信语音",button_text="确认")
-    display_dialog("实验与学习","自我审视 +  面试录音 + 反思 + 分析笔记",button_text="确认")
+    display_dialog("实验与学习","自我审视+ 反思 + 分析笔记",button_text="确认",button_cancel=False)
+    failed_safe()
 
 def clean_and_update(task:str):
     """整理与优化
@@ -79,8 +101,9 @@ def clean_and_update(task:str):
     Args:
         task (str): 任务
     """
-    failed_safe()
+    display_dialog("整理与优化",f"是否可以开始整理与优化: {task}",button_text="可以",button_cancel=False)
     task_with_time(task_name = task,time=20)
+    failed_safe()
 
 def design(task:str):
     """设计
@@ -88,10 +111,10 @@ def design(task:str):
     Args:
         task (str): 任务名
     """
-    failed_safe()
+    display_dialog("设计",f"准备开始设计: {task}",button_text="开始",button_cancel=False)
     task_with_time(task_name = task,time=60)
-    get_commit_something("obsidain",task)
-
+    git_commit_something("obsidian",task)
+    failed_safe()
 
 def meeting_and_talk(task:str):
     """开会与对齐
@@ -99,25 +122,21 @@ def meeting_and_talk(task:str):
     Args:
         task (str): 任务名
     """
-    # 开会与对齐
-    failed_safe()
+    display_dialog("开会与对齐",f"准备开会与对齐: {task}",button_text="开始",button_cancel=False)
     task_with_time(task_name = task,time=60)
+    failed_safe()
 
-def task_finish(task):
+def task_complete(task):
 
     # 任务已完成
     # multi_line_input = "真实人生-将对应的执行池内容添加到完成池"
-
 
     """
      script/kanban_manager_2over_function.py
     任务$canvas_path
      script/kanban_manager_2over.py
     """
-    project_paths = ["/工程系统级设计/项目级别/数字人生/模拟资质认证/模拟资质认证.canvas",
-                    "/工程系统级设计/项目级别/数字人生/DigitalLife/施工安排.canvas",
-                    "/工程系统级设计/项目级别/autoworker/施工安排.canvas",
-                    "/工程系统级设计/项目级别/真实人生/施工安排.canvas"]
+    project_paths = WORK_CANVAS_PATH
     # task = "真实人生-将对应的执行池内容添加到完成池"
     project = task.split('-',1)[0]
     now_project_path = None
@@ -125,8 +144,10 @@ def task_finish(task):
         if project == project_path.split('/')[-2]:
             now_project_path = project_path
 
-    kbm = KanBanManager()
-    kbm.sync_run2over(task,canvas_path=now_project_path)
+    kbm = KanBanManager(kanban_path=KANBAN_PATH,pathlib=WORK_CANVAS_PATH)
+    print('now_project_path',now_project_path)
+    if now_project_path:
+        kbm.sync_run2over(task,canvas_path=now_project_path)
 
     def runner2over(task:str,kanban_path:str,canvas_path:str):
         """从执行池添加到完成池
@@ -177,5 +198,5 @@ def task_failed(task):
     """
      script/kanban_manager_runner2order.py
     """
-    kbm = KanBanManager()
+    kbm = KanBanManager(kanban_path=KANBAN_PATH,pathlib=WORK_CANVAS_PATH)
     kbm.sync_run2order(task)

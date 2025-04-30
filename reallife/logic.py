@@ -12,6 +12,8 @@ from .event.tips import check_chan,check_news
 from .event.utils import run_shortcut
 from .event.task_action import clean_and_update,edit_coder, test_and_study
 from .event.task_action import design, meeting_and_talk, judge_type
+from .event.task_action import task_failed,task_complete
+from .event.utils import display_dialog
 
 class TaskInfo(Exception):
     """任务的抛出机制
@@ -83,8 +85,8 @@ def start_work(debug=True)->str:
         check_(change_frist)
         check_action_(sync_run_pool,debug)
         # check_action_(sync_news) # 对方改版了,等着用pypeteer去做吧
-        check_action_(sync_calulate)
-        check_action_(sync_note)
+        check_action_(sync_calulate,debug)
+        check_action_(sync_note,debug)
         # bulid知识库
     except TaskInfo as e:
         return e
@@ -105,9 +107,8 @@ def tasks():
         if not task:
             return '无任务'
         task_type = judge_type(task)
-        print("task_type:",task_type)
 
-        task_type = "开会与对齐"
+        task_type = "实验与学习"
         if task_type == "代码与练习":
             edit_coder(task)
         elif task_type == "实验与学习":
@@ -122,11 +123,18 @@ def tasks():
             print('新的类别')
             # 开会与对齐
             meeting_and_talk(task)
-        # 是否完成任务
+
+        task_result = display_dialog("判断",f"任务是否完成: ",button_text="complete",button_cancel=True)
+        if task_result == 'complete':
             # 完成任务
-            # 非完成任务
+            task_complete(task=task)
+        else:
+            # 完成未任务
+            task_failed(task=task)
+
+        
         # 移除完成的任务
-        task = run_shortcut("移除完成的任务")
+        run_shortcut("移除完成的任务",task)
 
     except TaskInfo as e:
         return e

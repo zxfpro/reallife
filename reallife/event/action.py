@@ -14,6 +14,20 @@ from .utils import read_file,parse_execution_pool,parse_execution_jiangyou_pool,
 date_c = Date()
 date = date_c.date
 
+
+KANBAN_PATH = "/Users/zhaoxuefeng/GitHub/obsidian/工作/事件看板/事件看板.md"
+
+WORK_CANVAS_PATH = ["/工程系统级设计/能力级别/grapher/grapher.canvas",
+                    "/工程系统级设计/能力级别/kanban/kanban.canvas",
+                    "/工程系统级设计/能力级别/llmada/llmada.canvas",
+                    "/工程系统级设计/能力级别/obragtools/obragtools.canvas",
+                    "/工程系统级设计/能力级别/promptlibz/promptlibz.canvas",
+                    "/工程系统级设计/能力级别/pypidoctor/pypidoctor.canvas",
+                    "/工程系统级设计/能力级别/reallife/reallife.canvas",
+                    "/工程系统级设计/能力级别/toolsz/toolsz.canvas",
+                    "/工程系统级设计/项目级别/数字人生/模拟资质认证/模拟资质认证.canvas",
+                    "/工程系统级设计/项目级别/数字人生/DigitalLife/DigitalLife.canvas",
+                    "/工程系统级设计/项目级别/自动化工作/coder/coder.canvas",]
 # AI 处理相关
 def generate_schedule(text: str,habit: str="") -> str:
     """
@@ -70,11 +84,9 @@ def generate_schedule(text: str,habit: str="") -> str:
 
 
 class KanBanManager():
-    def __init__(self):
-        self.kanban_path ="/Users/zhaoxuefeng/GitHub/obsidian/工作/事件看板/事件看板.md"
-        self.pathlib = ["/工程系统级设计/项目级别/数字人生/模拟资质认证/模拟资质认证.canvas",
-                        "/工程系统级设计/项目级别/数字人生/DigitalLife/DigitalLife.canvas",
-                        "/工程系统级设计/项目级别/自动化工作/coder/coder.canvas",]
+    def __init__(self,kanban_path,pathlib):
+        self.kanban_path = kanban_path
+        self.pathlib = pathlib
 
     def _encode(self,i,project_name):
         return project_name+'-'+i
@@ -267,7 +279,7 @@ class APPIO():
         subprocess.run(['/usr/bin/osascript', '-e', scrip])
 
     def _write_notes(self,content):
-        content = content.replace("\n","换行")
+        content = content.replace("\n",",").replace('- [ ]','')
         # 构造 AppleScript 脚本  TODO 解决无法换行问题
         script = f'''
         tell application "Notes"
@@ -417,28 +429,32 @@ class APPIO():
 def sync_weight():
     """同步体重
     """
-    kanb = KanBanManager()
+    kanb = KanBanManager(kanban_path=KANBAN_PATH,
+                         pathlib=WORK_CANVAS_PATH)
     kanb.sync_weight(date)
 
 @status(task="同步预备池",date=date,run_only=True)
 def sync_ready_pool()->str:
     """同步预备池
     """
-    kanb = KanBanManager()
+    kanb = KanBanManager(kanban_path=KANBAN_PATH,
+                         pathlib=WORK_CANVAS_PATH)
     kanb.sync_ready()
 
 @status(task="同步就绪池",date=date,run_only=True)
 def sync_order_pool()->str:
     """同步就绪池
     """
-    kanb = KanBanManager()
+    kanb = KanBanManager(kanban_path=KANBAN_PATH,
+                         pathlib=WORK_CANVAS_PATH)
     kanb.sync_order()
 
 @status(task="同步执行池",date=date,run_only=True)
 def sync_run_pool()->str:
     """同步执行池
     """
-    kanb = KanBanManager()
+    kanb = KanBanManager(kanban_path=KANBAN_PATH,
+                         pathlib=WORK_CANVAS_PATH)
     kanb.sync_run()
 
 @status(task="同步日历",date=date,run_only=True)

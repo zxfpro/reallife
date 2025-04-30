@@ -1241,8 +1241,8 @@ wheels = [
 
 [[package]]
 name = "promptlibz"
-version = "0.1.4"
-source = { registry = "https://pypi.org/simple" }
+version = "0.1.5"
+source = { path = "../promptlibz/dist/promptlibz-0.1.5-py3-none-any.whl" }
 dependencies = [
     { name = "dill" },
     { name = "llama-index" },
@@ -1251,9 +1251,18 @@ dependencies = [
     { name = "pytest-html" },
     { name = "pyyaml" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/1a/01/661ce814c289047d4dbff226739c8bdc5e16eb9d9e351b041b336fcef3f7/promptlibz-0.1.4.tar.gz", hash = "sha256:28dc2d5b461cc76581bba9d2b60cccd9d80234bfb48355625f483b071d344c1a", size = 10941 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/35/22/0577b4a8567200409239796fc679a8935bcc5dd0e3490ac17c8c1e1e30f1/promptlibz-0.1.4-py3-none-any.whl", hash = "sha256:387b21bc6381763165f63f251665168f1e66e9ea361c7a5d2357bbf8a65e22b7", size = 10911 },
+    { filename = "promptlibz-0.1.5-py3-none-any.whl", hash = "sha256:836fcefb9b546e4e1640aa8b64669dfa6623fbeff224881abb06a388472eda40" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "dill", specifier = ">=0.4.0" },
+    { name = "llama-index", specifier = ">=0.12.31" },
+    { name = "pandas", specifier = ">=2.2.3" },
+    { name = "pytest", specifier = ">=8.3.5" },
+    { name = "pytest-html", specifier = ">=4.1.1" },
+    { name = "pyyaml", specifier = ">=6.0.2" },
 ]
 
 [[package]]
@@ -1528,7 +1537,7 @@ requires-dist = [
     { name = "llmada", specifier = ">=0.1.8" },
     { name = "numpy", specifier = ">=2.2.5" },
     { name = "pandas", specifier = ">=2.2.3" },
-    { name = "promptlibz", specifier = ">=0.1.3" },
+    { name = "promptlibz", path = "../promptlibz/dist/promptlibz-0.1.5-py3-none-any.whl" },
     { name = "pytest", specifier = ">=8.3.5" },
     { name = "pytest-html", specifier = ">=4.1.1" },
     { name = "pyyaml", specifier = ">=6.0.2" },

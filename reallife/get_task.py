@@ -5,7 +5,7 @@ from .logic import morning,evening,start_work,finish_work,tasks
 from .event.utils import Date,push_task
 
 date_c = Date()
-DEBUG = True
+DEBUG = False
 
 def receive()->str:
     """领取一个任务(普通模式)
@@ -25,7 +25,7 @@ def receive()->str:
        datetime.strptime(date+" 8:50:00", "%Y-%m-%d %H:%M:%S"):
         if DEBUG:
             print('start')
-        return start_work()
+        return start_work(debug=DEBUG)
 
     if datetime.strptime(date+" 18:00:00", "%Y-%m-%d %H:%M:%S") > time >= \
        datetime.strptime(date+" 10:00:00", "%Y-%m-%d %H:%M:%S"):
