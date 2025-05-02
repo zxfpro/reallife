@@ -107,8 +107,6 @@ def tasks():
         if not task:
             return '无任务'
         task_type = judge_type(task)
-
-        task_type = "实验与学习"
         if task_type == "代码与练习":
             edit_coder(task)
         elif task_type == "实验与学习":
