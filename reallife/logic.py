@@ -13,7 +13,7 @@ from .event.utils import run_shortcut
 from .event.task_action import clean_and_update,edit_coder, test_and_study
 from .event.task_action import design, meeting_and_talk, judge_type
 from .event.task_action import task_failed,task_complete
-from .event.utils import display_dialog
+from .event.utils import display_dialog,display_dialog_for_end
 
 class TaskInfo(Exception):
     """任务的抛出机制
@@ -122,10 +122,17 @@ def tasks():
             # 开会与对齐
             meeting_and_talk(task)
 
-        task_result = display_dialog("判断",f"任务是否完成: ",button_text="complete",button_cancel=True)
+        task_result = display_dialog_for_end("判断",f"任务是否完成: ",button_text="complete",button_text2="blockage",button_cancel=True)
+
         if task_result == 'complete':
             # 完成任务
             task_complete(task=task)
+        
+        elif task_result == 'blockage':
+            # 任务阻塞
+            #TODO
+            pass
+
         else:
             # 完成未任务
             task_failed(task=task)

@@ -25,6 +25,8 @@ WORK_CANVAS_PATH = ["/工程系统级设计/能力级别/grapher/grapher.canvas"
                     "/工程系统级设计/能力级别/pypidoctor/pypidoctor.canvas",
                     "/工程系统级设计/能力级别/reallife/reallife.canvas",
                     "/工程系统级设计/能力级别/toolsz/toolsz.canvas",
+                    "/工程系统级设计/能力级别/szrsfeelthefield/szrsfeelthefield.canvas",
+                    "/工程系统级设计/能力级别/szrsmemory/szrsmemory.canvas",
                     "/工程系统级设计/项目级别/数字人生/模拟资质认证/模拟资质认证.canvas",
                     "/工程系统级设计/项目级别/数字人生/DigitalLife/DigitalLife.canvas",
                     "/工程系统级设计/项目级别/自动化工作/coder/coder.canvas",]
@@ -298,6 +300,44 @@ class APPIO():
         # 执行 AppleScript 脚本
         subprocess.run(['/usr/bin/osascript', '-e', script])
 
+    def _write_reminder(self,content, 
+                        list_name="Reminders",  # 指定列表名称
+                        due_date=None,         # 设置到期日
+                        priority=None,         # 设置优先级(1-4)
+                        notes=""               # 添加备注
+                    ):
+        # 预处理内容
+        processed_content = content.replace('\n', ' ').replace('- [ ]', '').strip()
+        processed_content = processed_content.replace('"', '\\"')
+        notes = notes.replace('"', '\\"')
+        
+        # 构建属性字典
+        properties = [f'name:"{processed_content}"']
+        if due_date:
+            properties.append(f'due date:(date "{due_date}")')
+        if priority and 1 <= priority <= 4:
+            properties.append(f'priority:{priority}')
+        if notes:
+            properties.append(f'body:"{notes}"')
+        
+        # 构造AppleScript
+        script = f'''
+        tell application "Reminders"
+            activate
+            set targetList to list "{list_name}"
+            make new reminder in targetList with properties {{{', '.join(properties)}}}
+        end tell
+        '''
+        script = f'''
+        tell application "Reminders"
+            activate
+            set targetList to default list
+            set newReminder to make new reminder in targetList with properties {{{', '.join(properties)}}}
+            show newReminder
+        end tell
+        '''    
+        subprocess.run(['/usr/bin/osascript', '-e', script])
+
     def _get_context_from_jq_url(self,url):
         # 目标网页的 URL
         headers = {
@@ -404,6 +444,12 @@ class APPIO():
         schedule_result = str(current_utc_time)[:10] + '\n' + execution_pool
 
         self._write_notes(schedule_result)
+        for content in schedule_result.split("\n")[1:]:
+            self._write_reminder(content, 
+                list_name="工作",
+                due_date=f"{date_c.date} {date_c.time}",
+                priority=2,
+                notes="")
 
     def sync_news(self,date:str):
         """同步咨询到ob

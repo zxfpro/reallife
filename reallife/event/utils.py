@@ -81,6 +81,34 @@ def display_dialog(title, text, button_text="OK",button_cancel = True):
     except FileNotFoundError:
         print("Error: 'osascript' command not found. Ensure you are on macOS.")
 
+def display_dialog_for_end(title, text, button_text="OK",button_text2="OK",button_cancel = True):
+    # # --- 示例 ---
+    # display_dialog("任务完成", "您的 Python 脚本已成功执行！")
+    # display_dialog("用户输入", "请输入一些内容：", button_text="确认") # 这是一个简单的信息框，获取输入更复杂
+    """使用 AppleScript 显示一个简单的对话框"""
+    if button_cancel:
+        script = f'''
+        display dialog "{text}" with title "{title}" buttons {{"cancel","{button_text}","{button_text2}"}} \
+            default button "{button_text}"
+        '''
+    else:
+        script = f'''
+        display dialog "{text}" with title "{title}" buttons {{"{button_text}"}} \
+            default button "{button_text}"
+        '''
+
+    try:
+        # 使用 shlex.quote 防止注入
+        shlex.quote(script)
+        result = subprocess.run(['osascript', '-e', script],
+                                check=True, capture_output=True, text=True)
+        # print(result.stdout)
+        return result.stdout[16:-1]
+    except subprocess.CalledProcessError as e:
+        print(f"Error displaying dialog: {e}")
+    except FileNotFoundError:
+        print("Error: 'osascript' command not found. Ensure you are on macOS.")
+
 def get_choice_from_applescript(prompt_text="请从下面的列表中选择一项：", list_title="请选择", options=None, default_option=None):
     """
     使用 AppleScript 显示一个列表选择框，并返回用户的选择。

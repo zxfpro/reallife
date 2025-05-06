@@ -183,11 +183,13 @@ def task_complete(task):
         return 'success'
 
     # taskandcanvas_path = "备案-新域名做域名备案$/工程系统级设计/项目级别/数字人生/模拟资质认证/模拟资质认证.canvas\n"
-
-    canvas_path = now_project_path.replace('\n','')
-    runner2over(task,
-                kanban_path ="/Users/zhaoxuefeng/GitHub/obsidian/工作/事件看板/事件看板.md",
-                canvas_path ="/Users/zhaoxuefeng/GitHub/obsidian/工作"+canvas_path)
+    try:
+        canvas_path = now_project_path.replace('\n','')
+        runner2over(task,
+                    kanban_path ="/Users/zhaoxuefeng/GitHub/obsidian/工作/事件看板/事件看板.md",
+                    canvas_path ="/Users/zhaoxuefeng/GitHub/obsidian/工作"+canvas_path)
+    except AttributeError as e:
+        print('noe')
     return 'success'
 
 ##########
