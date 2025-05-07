@@ -155,7 +155,8 @@ def finish_work():
 
     try:
         # 知识库整理
-        # 执行池未完成的内容回归到就绪池
+        #TODO 执行池未完成的内容回归到就绪池
+        #FIXME
         check_action_(sync_note_night)
         check_(check_news)
         check_(check_chan)

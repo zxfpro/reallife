@@ -79,7 +79,8 @@ def generate_schedule(text: str,habit: str="") -> str:
 
     # 配置相关
     llm = BianXieAdapter()
-    llm.set_model("o3-mini")
+    # llm.set_model("o3-mini")
+    llm.set_model("gpt-4.1-mini")
 
     completion = llm.product(prompt)
     return completion
@@ -167,9 +168,11 @@ class KanBanManager():
     def sync_run2order(self,task):
         kanban = Kanban(self.kanban_path)
         kanban.pull()
-        task_ = kanban.select_by_word(task)[0] # select_by_word_in
-        kanban.pop(inputs=task_,by='description',pool=Pool.执行池)
-        kanban.insert(text=task_,pool=Pool.就绪池)
+        tasks = kanban.get_tasks_in(Pool.执行池)
+        if tasks:
+            for task in tasks:
+                kanban.pop(text=task,pool=Pool.执行池)
+                kanban.insert(text=task,pool=Pool.就绪池)
         kanban.push()
         return 'success'
 
