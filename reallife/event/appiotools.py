@@ -1,4 +1,3 @@
-""" 动作函数 """
 import subprocess
 from datetime import datetime
 from functools import lru_cache
@@ -15,20 +14,6 @@ from .kanbantools import KanBanManager
 
 
 from .utils import Setting
-
-def generate_schedule(text: str,habit: str="") -> str:
-    """
-    使用 GPT 模型生成日程安排
-    :param text: 输入文本
-    :return: 生成的日程安排结果
-    """
-    set = Setting()
-    template = Templates(TemplateType.GENERATE_SCHEDULE)
-    current_utc_time = str(datetime.today())[:-7]
-    prompt = template.format(text=text,habit=habit,current_utc_time = current_utc_time)
-    completion = set.llm.product(prompt)
-    return completion
-
 
 class APPIO():
     def __init__(self):
@@ -249,75 +234,3 @@ class APPIO():
         file_path = f"/Users/zhaoxuefeng/GitHub/obsidian/工作/日记/{date}.md"
         with open(file_path,'a') as f:
             f.write("\n\n# 今日资讯\n---\n## 消息\n" +'\n\n---\n## 消息\n'.join(article))
-
-
-date_c = Date()
-date = date_c.date
-
-@status(task="同步体重",date=date,run_only=True)
-def sync_weight():
-    """同步体重
-    """
-    kanb = KanBanManager(kanban_path=KANBAN_PATH,
-                         pathlib=WORK_CANVAS_PATH)
-    kanb.sync_weight(date)
-
-@status(task="同步预备池",date=date,run_only=True)
-def sync_ready_pool()->str:
-    """同步预备池
-    """
-    kanb = KanBanManager(kanban_path=KANBAN_PATH,
-                         pathlib=WORK_CANVAS_PATH)
-    kanb.sync_ready()
-
-@status(task="同步就绪池",date=date,run_only=True)
-def sync_order_pool()->str:
-    """同步就绪池
-    """
-    kanb = KanBanManager(kanban_path=KANBAN_PATH,
-                         pathlib=WORK_CANVAS_PATH)
-    kanb.sync_order()
-
-@status(task="同步执行池",date=date,run_only=True)
-def sync_run_pool()->str:
-    """同步执行池
-    """
-    kanb = KanBanManager(kanban_path=KANBAN_PATH,
-                         pathlib=WORK_CANVAS_PATH)
-    kanb.sync_run()
-
-@status(task="同步日历",date=date,run_only=True)
-def sync_calulate()->str:
-    """同步日历
-    """
-    appio = APPIO()
-    appio.sync_calulate()
-
-
-@status(task="同步备忘录",date=date,run_only=True)
-def sync_note()->str:
-    """同步备忘录
-    """
-    appio = APPIO()
-    appio.sync_notes()
-
-@status(task="同步备忘录夜",date=date,run_only=True)
-def sync_note_night()->str:
-    """同步备忘录夜
-    """
-    appio = APPIO()
-    appio.sync_notes()
-
-@status(task="回收未完成的任务",date=date,run_only=True)
-def recycle_tasks()->str:
-    """回收未完成的任务
-    """
-    #TODO 做回收任务
-    pass
-
-@status(task="收集资讯",date=date,run_only=True)
-def sync_news()->str:
-    """收集资讯
-    """
-    appio = APPIO()
-    appio.sync_news(date)

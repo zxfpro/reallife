@@ -1,6 +1,6 @@
 """ 逻辑覆盖能力 """
 from .event.action import sync_calulate,sync_weight,sync_ready_pool,sync_order_pool
-from .event.action import sync_run_pool, sync_note, sync_news, sync_note_night
+from .event.action import sync_run_pool, sync_note, sync_news, sync_note_night, recycle_tasks
 
 from .event.tips import ding_morning,ding_evening
 from .event.tips import change_frist,write_thinking,update_state_pause
@@ -154,9 +154,8 @@ def finish_work():
     """
 
     try:
-        # 知识库整理
-        #TODO 执行池未完成的内容回归到就绪池
-        #FIXME
+        #TODO 知识库整理
+        check_action_(recycle_tasks)
         check_action_(sync_note_night)
         check_(check_news)
         check_(check_chan)
