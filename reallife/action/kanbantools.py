@@ -1,19 +1,15 @@
 """ 动作函数 """
-
 import requests
 from grapherz.canvas.core import Canvas,Color
 from kanban.core import Pool,Kanban
 from contextlib import contextmanager
-from .utils import Setting
-from promptlibz import Templates,TemplateType
-
+from .scripts import give_a_task_time
 
 @contextmanager
 def controlKanban(kanban:Kanban):
     kanban.pull()
     yield kanban
     kanban.push()
-
 
 class KanBanManager():
     def __init__(self,kanban_path,pathlib):
@@ -22,24 +18,16 @@ class KanBanManager():
         self.kanban = Kanban(self.kanban_path)
         self.main_path = "/Users/zhaoxuefeng/GitHub/obsidian/工作"
 
-    def _encode(self,i,project_name):
-        return project_name+'-'+i
-
-    def _save_in_pauses(self,i,pauses):
-        for pause in pauses:
-            if i.get('text') in pause:
-                return True
-        return False
-
-    def _give_a_task_time(self,task:str)->str:
-        set = Setting()
-        template = Templates(TemplateType.ESTIMATE_DURATION)
-        prompt = template.format(task=task)
-        completion = set.llm.product(prompt)
-        return completion + " "+ task
-
-
     def sync_ready(self):
+        def encode(i,project_name):
+            return project_name+'-'+i
+        
+        def save_in_pauses(i,pauses):
+            for pause in pauses:
+                if i.get('text') in pause:
+                    return True
+            return False
+
         for path in self.pathlib:
             canvas_path=self.main_path+path
             canvas = Canvas(file_path=canvas_path)
@@ -48,10 +36,10 @@ class KanBanManager():
                 pauses = kb.get_tasks_in(pool=Pool.阻塞池)
                 readys = kb.get_tasks_in(pool=Pool.预备池)
 
-                nodes = [i.get('text') or '' for i in canvas.select_by_color(Color.yellow,type='node') if not self._save_in_pauses(i,pauses=pauses)]
+                nodes = [i.get('text') or '' for i in canvas.select_by_color(Color.yellow,type='node') if not save_in_pauses(i,pauses=pauses)]
                 for i in nodes:
                     if i not in readys:
-                        kb.insert(text=self._encode(i,project_name),pool=Pool.预备池)
+                        kb.insert(text=encode(i,project_name),pool=Pool.预备池)
         return 'success'
 
     def sync_order(self):
@@ -62,7 +50,7 @@ class KanBanManager():
             for task in tasks:
                 kb.pop(text = task,pool = Pool.预备池)
                 if task not in orders:
-                    task_ = self._give_a_task_time(task)
+                    task_ = give_a_task_time(task)
                     kb.insert(text=task_,pool=Pool.就绪池)
         return 'success'
 
@@ -132,6 +120,7 @@ class KanBanManager():
             canvas.to_file(canvas_path)
 
         return 'success'
+
 
     def add_tips(self,task:str):
         """从执行池添加到完成池

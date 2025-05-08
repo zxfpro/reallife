@@ -5,21 +5,21 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 import re
 import pytest
 
-from reallife.get_task import receive,complete
+from reallife.core import receive,complete
 
 
 
 
 
-from reallife.event.utils import Date
-from reallife.event.action import sync_calulate,sync_weight,sync_ready_pool,sync_order_pool,APPIO
-from reallife.event.action import sync_run_pool, sync_note, sync_news, sync_note_night
+from reallife.utils2 import Date
+from reallife.action.action import sync_calulate,sync_weight,sync_ready_pool,sync_order_pool,APPIO
+from reallife.action.action import sync_run_pool, sync_note, sync_news, sync_note_night
 
-from reallife.event.task_action import clean_and_update,edit_coder
-from reallife.event.task_action import design, meeting_and_talk, judge_type
-from reallife.event.task_action import task_failed,task_complete
+from reallife.nodes import clean_and_update,edit_coder
+from reallife.nodes import design, meeting_and_talk, judge_type
+from reallife.nodes import task_failed,task_complete
 
-from reallife.event.utils import run_shortcut, display_dialog
+from reallife.utils2 import run_shortcut, display_dialog
 
 
 
