@@ -19,6 +19,7 @@ dependencies = [
     "pyyaml>=6.0.2",
     "toolsz>=0.1.5",
 ]
+
 [tool.setuptools.package-data]
 # 告诉 setuptools 在 reallife 包中包含 config/config.yaml
 # 注意这里的路径仍然是相对于 reallife 目录的
