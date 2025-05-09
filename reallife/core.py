@@ -207,3 +207,6 @@ def complete():
     date = Date().date
     task = receive()
     push_task(task=task,date=date)
+
+
+#TODO 强化型健身  1周一次 在突破技能   5000米 + 负重 + 拳击
