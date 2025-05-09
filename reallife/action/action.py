@@ -65,8 +65,9 @@ def sync_note_night()->str:
 def recycle_tasks()->str:
     """回收未完成的任务
     """
-    #TODO 做回收任务
-    pass
+    kanb = KanBanManager(kanban_path=KANBAN_PATH,
+                         pathlib=WORK_CANVAS_PATH)
+    kanb.sync_run2order()
 
 @status(task="收集资讯",date=date,run_only=True)
 def sync_news()->str:

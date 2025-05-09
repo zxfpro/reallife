@@ -70,7 +70,7 @@ class KanBanManager():
                     pass
         return 'success'
     
-    def sync_run2order(self,task):
+    def sync_run2order(self):
         with controlKanban(self.kanban) as kb:
             tasks = kb.get_tasks_in(Pool.执行池)
             if tasks:
@@ -133,19 +133,18 @@ class KanBanManager():
             None: None
         """
         with controlKanban(self.kanban) as kb:
-            kb.insert(text=task,pool=Pool.酱油池)
+            kb.insert(text=task,pool=Pool.预备池)
         return 'success'
 
-    def _get_weight(self,date):
-        url = f"http://101.201.244.227:8000/weight/{date}"
-        response = requests.get(url)
-        return response.json().get('weight')
 
     def sync_weight(self,date)->str:
         """
         同步体重
         """
-        result = self._get_weight(date)
+
+        url = f"http://101.201.244.227:8000/weight/{date}"
+        response = requests.get(url)
+        result = response.json().get('weight')
         x = f"""---
 番茄: 14
 体重: {result}

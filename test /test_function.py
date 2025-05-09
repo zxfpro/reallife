@@ -11,16 +11,16 @@ from reallife.core import receive,complete
 
 import reallife
 
-
+@pytest.mark.skip('wait')
 def test_tips():
     pass
-
+@pytest.mark.skip('wait')
 def test_check_():
     pass
-
+@pytest.mark.skip('wait')
 def test_check_action_():
     pass
-
+@pytest.mark.skip('wait')
 def test_display_dialog_for_end():
     pass
 

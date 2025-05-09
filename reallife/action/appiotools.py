@@ -47,8 +47,8 @@ def parse_execution_jiangyou_pool(text: str) -> Optional[str]:
         return None
     
 
-
-
+from .scripts import get_page_html
+import asyncio
 
 class APPIO():
     def __init__(self):
@@ -108,6 +108,16 @@ class APPIO():
         def _get_articlie_link():
             # 目标网页的 URL
             url = "https://www.jiqizhixin.com"
+            file_links = ["https://www.jiqizhixin.com/articles/2025-05-07-9",
+                          "https://www.jiqizhixin.com/articles/2025-05-07-8",
+                          "https://www.jiqizhixin.com/articles/2025-05-07-7",
+                          "https://www.jiqizhixin.com/articles/2025-05-07-6",
+                          ]
+            return file_links
+        
+        def _get_articlie_link_2():
+            # 目标网页的 URL
+            url = "https://www.jiqizhixin.com"
 
             headers = {
                 "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) \
@@ -134,28 +144,18 @@ class APPIO():
                 print("请求失败，状态码：", response.status_code)
             return file_links
         
-        def _get_context_from_jq_url(url):
+        async def _get_context_from_jq_url(url):
             # 目标网页的 URL
-            headers = {
-                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) \
-                    AppleWebKit/537.36 (KHTML, like Gecko) \
-                        Chrome/91.0.4472.124 Safari/537.36"
-            }
-            # 发送 HTTP 请求获取网页内容
-            response = requests.get(url, headers=headers)
+             
+            target_url = url
+            html = await get_page_html(target_url)
 
-            # 检查请求是否成功
-            if response.status_code == 200:
-                # 解析 HTML 内容
-                soup = BeautifulSoup(response.content, 'html.parser')
 
-                # 提取网页中的文字内容
-                text = soup.get_text()
-                return text
-                # 打印提取的文字内容
-            else:
-                print("请求失败，状态码：", response.status_code)
-                return ''
+            soup = BeautifulSoup(html, 'html.parser')
+
+            # 提取网页中的文字内容
+            text = soup.get_text()
+            return text
             
         @lru_cache(maxsize=100)
         def _extra_text(text):
@@ -175,12 +175,13 @@ class APPIO():
             prompt = template.format(text = text)
             completion = llm.product(prompt)
             return completion
+        
         file_links = _get_articlie_link()
         print(file_links,'file_links')
         article = []
         for file_link in file_links:
             print(file_link)
-            result = _get_context_from_jq_url(file_link)
+            result = asyncio.run(_get_context_from_jq_url(file_link))
             xx = _extra_text(result)
             article.append(xx)
 

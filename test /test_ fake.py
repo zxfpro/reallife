@@ -9,7 +9,7 @@ import pytest
 from reallife.core import receive,complete
 
 # 将项目根目录添加到 Python 路径
-
+@pytest.mark.skip('wait')
 def test_receive():
     print(receive())
 

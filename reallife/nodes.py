@@ -138,4 +138,5 @@ def task_failed(task):
      script/kanban_manager_runner2order.py
     """
     kbm = KanBanManager(kanban_path=KANBAN_PATH,pathlib=WORK_CANVAS_PATH)
-    kbm.sync_run2order(task)
+
+    kbm.sync_run2order()
