@@ -154,6 +154,20 @@ def evening()->str:
 
     return 'success'
 
+def rest()->str:
+    date = Date().date
+    try:
+        check_(create_func(task='吃早饭',date=date))
+        check_(create_func(task='洗漱',date=date))
+        check_(create_func(task='锻炼',date=date))
+        check_(create_func(task='睡觉',date=date))
+    except TaskInfo as e:
+        return e
+    return "success"
+
+from chinese_calendar import is_workday
+from datetime import datetime
+
 def receive()->str:
     """领取一个任务(普通模式)
 
@@ -163,43 +177,36 @@ def receive()->str:
     time = Date().time
     date = Date().date
     DEBUG = Setting().debug
-    
-    time = datetime.strptime(f"{date} {time}", "%Y-%m-%d %H:%M:%S")
-    # Create datetime objects once to avoid repetition
-    time_8_50 = datetime.strptime(date + " 8:50:00", "%Y-%m-%d %H:%M:%S")
-    time_10_00 = datetime.strptime(date + " 10:00:00", "%Y-%m-%d %H:%M:%S") 
-    time_18_00 = datetime.strptime(date + " 18:00:00", "%Y-%m-%d %H:%M:%S")
-    time_19_00 = datetime.strptime(date + " 19:00:00", "%Y-%m-%d %H:%M:%S")
-    time_23_00 = datetime.strptime(date + " 23:00:00", "%Y-%m-%d %H:%M:%S")
-    
-    if time < time_8_50:
-        if DEBUG:
-            print('morning')
-        return morning()
+    date_obj = datetime.strptime(date, '%Y-%m-%d').date()
 
-    elif time_8_50 < time <= time_10_00:
-        if DEBUG:
-            print('start')
-        return start_work(debug=DEBUG)
+    if is_workday(date_obj):
+        time = datetime.strptime(f"{date} {time}", "%Y-%m-%d %H:%M:%S")
+        # Create datetime objects once to avoid repetition
+        time_8_50 = datetime.strptime(date + " 8:50:00", "%Y-%m-%d %H:%M:%S")
+        time_10_00 = datetime.strptime(date + " 10:00:00", "%Y-%m-%d %H:%M:%S") 
+        time_18_00 = datetime.strptime(date + " 18:00:00", "%Y-%m-%d %H:%M:%S")
+        time_19_00 = datetime.strptime(date + " 19:00:00", "%Y-%m-%d %H:%M:%S")
+        time_23_00 = datetime.strptime(date + " 23:00:00", "%Y-%m-%d %H:%M:%S")
+        
+        if time < time_8_50:
+            return morning()
 
-    elif time_10_00 <= time < time_18_00:
-        if DEBUG:
-            print('tasks')
-        return tasks()
+        elif time_8_50 < time <= time_10_00:
+            return start_work(debug=DEBUG)
 
-    elif time_18_00 <= time < time_19_00:
-        if DEBUG:
-            print('close')
-        return finish_work()
+        elif time_10_00 <= time < time_18_00:
+            return tasks()
 
-    elif time_19_00 <= time < time_23_00:
-        if DEBUG:
-            print('evening')
-        return evening()
+        elif time_18_00 <= time < time_19_00:
+            return finish_work()
 
-    if DEBUG:
-        print('end')
-    return 'success'
+        elif time_19_00 <= time < time_23_00:
+            return evening()
+
+        return 'success'
+    else:
+        rest()
+
 
 def complete():
     """完成当前任务
