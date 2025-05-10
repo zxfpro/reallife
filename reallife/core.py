@@ -3,6 +3,7 @@
 from datetime import datetime
 from .action.action import sync_calulate,sync_weight,sync_ready_pool,sync_order_pool,add_tips
 from .action.action import sync_run_pool, sync_note, sync_news, sync_note_night, recycle_tasks
+from .action.action import git_obsidian_pull, git_obsidian_push,git_obsidian_pull1,git_obsidian_push1
 
 from .nodes import clean_and_update,edit_coder, test_and_study
 from .nodes import design, meeting_and_talk
@@ -46,14 +47,19 @@ def start_work(debug=True)->str:
     date = Date().date
     try:
         check_(create_func(task='上班打卡',date=date))
+        check_action_(git_obsidian_pull,debug)
         check_action_(sync_ready_pool,debug)
         check_action_(sync_order_pool,debug)
         check_action_(sync_weight,debug)
+        check_action_(git_obsidian_push,debug)
         check_(create_func(task='调整优先级',date=date))
+        check_action_(git_obsidian_pull1,debug)
         check_action_(sync_run_pool,debug)
         # check_action_(sync_news) # 对方改版了,等着用pypeteer去做吧
+        check_action_(git_obsidian_push1,debug)
         check_action_(sync_calulate,debug)
         check_action_(sync_note,debug)
+        # check_(create_func(task='拉取git',date=date))
         check_(create_func(task='倒水茶水',date=date))
         # bulid知识库
     except TaskInfo as e:

@@ -60,18 +60,19 @@ class APPIO():
 
         # 读取文件
         text = read_file(self.kanban_path)
-
+        print(text,'text')
         if not text:
             print("文件内容为空，无法解析执行池")
             return
 
         # 解析执行池
         execution_pool = parse_execution_pool(text)
-
+        print(execution_pool,'execution_pool')
         if execution_pool:
             print(f"解析到的执行池内容:\n{execution_pool}")
             # 生成日程安排
             schedule_result = generate_schedule(execution_pool,habit =self.habit)
+            print(schedule_result,'schedule_result')
             xx = [i for i in schedule_result.split('\n') if i!='']
             for xp in xx:
                 v = [(self.year+k if i<2 else k) for i,k in enumerate(xp.split('$'))]

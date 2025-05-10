@@ -59,6 +59,8 @@ class KanBanManager():
             tasks = kb.get_tasks_in(Pool.就绪池)
             all_task_time = 0
             for task in tasks:
+                if task.split(' ')[0][-1].lower() != 'p':
+                    continue
                 task_time = int(task.split(' ')[0][:-1])
 
                 if all_task_time + task_time <=14:

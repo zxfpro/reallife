@@ -83,3 +83,31 @@ def sync_news()->str:
     """
     appio = APPIO()
     appio.sync_news(date)
+
+
+from .utils import git_pull, git_push
+
+@status(task="更新obsidian内容",date=date,run_only=True)
+def git_obsidian_pull()->str:
+    """收集
+    """
+    git_pull("obsidian")
+
+@status(task="推送内容-调整优先级",date=date,run_only=True)
+def git_obsidian_push()->str:
+    """收集资讯
+    """
+    git_push('obsidian',commit='调整优先级')
+
+@status(task="拉取更新后的内容",date=date,run_only=True)
+def git_obsidian_pull1()->str:
+    """收集
+    """
+    git_pull("obsidian")
+
+@status(task="推送内容1-同步执行池",date=date,run_only=True)
+def git_obsidian_push1()->str:
+    """收集资讯
+    """
+    git_push('obsidian',commit='同步到执行池')
+
