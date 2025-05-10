@@ -70,6 +70,8 @@ async def reset_action(action_id: str,date: str):
 
 
 
+
+
 # 记录体重
 @app.post("/record/{weight}/{date}")
 async def record_weight(weight: float, date: str):

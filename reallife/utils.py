@@ -1,24 +1,56 @@
-
-####
-
 """ 系统工具箱 """
 
 from datetime import datetime
-import subprocess
-import shlex
 import os
-import re
-from typing import Optional
-import functools
 import requests
-
-
+import importlib.resources
 import yaml
+from .action.scripts import display_dialog,run_shortcut
+
+from .action.utils import create_func
+
+def push_task(task:str, date:str):
+    """推任务上去
+
+    Args:
+        task (str): 任务名
+        date (str): 日期
+    """
+    requests.post(
+        f"http://101.201.244.227:8000/action/{task}/{date}/execute",timeout=20)
+    return 'success'
+
+def reset_task(task:str,date:str)->str:
+    """重置任务
+
+    Args:
+        task (str): 任务名
+        date (str): 日期
+
+    Returns:
+        str: 系统消息
+    """
+    requests.post(
+        f"http://101.201.244.227:8000/action/{task}/{date}/reset",timeout=20)
+    return 'success'
+
+def reset_tasks(date:str):
+    """重置多任务
+
+    Args:
+        date (str): 日期
+    """
+    for task in ['同步进程池','同步预备池','同步就绪池','同步执行池',]:
+        reset_task(task,date)
+
+
 
 # Load configuration from YAML file
 def load_config():
-    with open('reallife/config.yaml', 'r', encoding='utf-8') as f:
+    with importlib.resources.open_text('reallife', 'config.yaml') as f:
         return yaml.safe_load(f)
+    # with open('reallife/config.yaml', 'r', encoding='utf-8') as f:
+    #     return yaml.safe_load(f)
 
 class TaskInfo(Exception):
     """任务的抛出机制
@@ -130,60 +162,3 @@ class Setting:
             self.debug = None
 
 
-
-
-
-def push_task(task:str, date:str):
-    """推任务上去
-
-    Args:
-        task (str): 任务名
-        date (str): 日期
-    """
-    requests.post(
-        f"http://101.201.244.227:8000/action/{task}/{date}/execute",timeout=20)
-    return 'success'
-
-def reset_task(task:str,date:str)->str:
-    """重置任务
-
-    Args:
-        task (str): 任务名
-        date (str): 日期
-
-    Returns:
-        str: 系统消息
-    """
-    requests.post(
-        f"http://101.201.244.227:8000/action/{task}/{date}/reset",timeout=20)
-    return 'success'
-
-def reset_tasks(date:str):
-    """重置多任务
-
-    Args:
-        date (str): 日期
-    """
-    for task in ['同步进程池','同步预备池','同步就绪池','同步执行池',]:
-        reset_task(task,date)
-
-
-def create_func(task:str,date:str)->object:
-    """创建特定对象
-
-    Args:
-        task (str): 任务
-        date (str, optional): 日期. Defaults to date.
-
-    Returns:
-        object: 状态函数
-    """
-    @status(task=task,date=date)
-    def func_():
-        """提醒
-
-        Returns:
-            str: 任务内容
-        """
-        return task
-    return func_

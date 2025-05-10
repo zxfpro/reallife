@@ -4,7 +4,6 @@ import subprocess
 from datetime import datetime
 from llama_index.core import PromptTemplate
 from promptlibz import Templates,TemplateType
-from reallife import Setting
 from llmada import BianXieAdapter
 import shlex
 
@@ -24,11 +23,12 @@ def generate_schedule(text: str,habit: str="") -> str:
     :param text: 输入文本
     :return: 生成的日程安排结果
     """
-    set = Setting()
+    llm = BianXieAdapter()
+
     template = Templates(TemplateType.GENERATE_SCHEDULE)
     current_utc_time = str(datetime.today())[:-7]
     prompt = template.format(text=text,habit=habit,current_utc_time = current_utc_time)
-    completion = set.llm.product(prompt)
+    completion = llm.product(prompt)
     return completion
 
 from .utils import extract_type_code

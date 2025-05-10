@@ -1,8 +1,8 @@
 """ 动作函数 """
-from .kanbantools import KanBanManager
-from .appiotools import APPIO
 from reallife import KANBAN_PATH,WORK_CANVAS_PATH,Date
 from .utils import status
+from .kanbantools import KanBanManager
+from .appiotools import APPIO
 
 date_c = Date()
 date = date_c.date
@@ -68,6 +68,14 @@ def recycle_tasks()->str:
     kanb = KanBanManager(kanban_path=KANBAN_PATH,
                          pathlib=WORK_CANVAS_PATH)
     kanb.sync_run2order()
+
+def add_tips(task:str)->str:
+    """回收未完成的任务
+    """
+    kanb = KanBanManager(kanban_path=KANBAN_PATH,
+                         pathlib=WORK_CANVAS_PATH)
+    kanb.add_tips(task)
+    return 'success'
 
 @status(task="收集资讯",date=date,run_only=True)
 def sync_news()->str:

@@ -44,6 +44,26 @@ def status(task:str,date:str,run_only = False):
     return outer_packing
 
 
+def create_func(task:str,date:str)->object:
+    """创建特定对象
+
+    Args:
+        task (str): 任务
+        date (str, optional): 日期. Defaults to date.
+
+    Returns:
+        object: 状态函数
+    """
+    @status(task=task,date=date)
+    def func_():
+        """提醒
+
+        Returns:
+            str: 任务内容
+        """
+        return task
+    return func_
+
 
 import re
 

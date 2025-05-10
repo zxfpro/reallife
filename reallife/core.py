@@ -1,16 +1,15 @@
 """ 提供对外的方法 提供一些带状态的消息 """
 
 from datetime import datetime
-from .action.action import sync_calulate,sync_weight,sync_ready_pool,sync_order_pool
+from .action.action import sync_calulate,sync_weight,sync_ready_pool,sync_order_pool,add_tips
 from .action.action import sync_run_pool, sync_note, sync_news, sync_note_night, recycle_tasks
 
 from .nodes import clean_and_update,edit_coder, test_and_study
 from .nodes import design, meeting_and_talk
 from .nodes import task_failed,task_complete
 
-from .utils import check_action_,check_, TaskInfo
-
 from .action.scripts import run_shortcut, display_dialog, display_dialog_for_end, judge_type
+from .utils import check_action_,check_, TaskInfo
 from .utils import create_func,push_task
 from reallife import Date, Setting
 
@@ -116,7 +115,6 @@ def tasks():
 
     return 'success'
 
-
 def finish_work():
     """收工动作
 
@@ -205,7 +203,7 @@ def receive()->str:
 
         return 'success'
     else:
-        rest()
+        return rest()
 
 
 def complete():
@@ -214,6 +212,11 @@ def complete():
     date = Date().date
     task = receive()
     push_task(task=task,date=date)
+
+
+def add_tip(task:str):
+    return add_tips(task)
+
 
 
 #TODO 强化型健身  1周一次 在突破技能   5000米 + 负重 + 拳击
