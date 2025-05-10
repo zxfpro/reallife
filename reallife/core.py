@@ -32,7 +32,7 @@ def morning()->str:
     except TaskInfo as e:
         return e
 
-    return 'success'
+    return {"message":"success"}
 
 def start_work(debug=True)->str:
     """开工
@@ -59,7 +59,7 @@ def start_work(debug=True)->str:
     except TaskInfo as e:
         return e
 
-    return 'success'
+    return {"message":"success"}
 
 def tasks():
     """任务列表
@@ -113,7 +113,7 @@ def tasks():
     except TaskInfo as e:
         return e
 
-    return 'success'
+    return {"message":"success"}
 
 def finish_work():
     """收工动作
@@ -133,7 +133,7 @@ def finish_work():
         check_(create_func(task='倒水茶水晚上',date=date))
     except TaskInfo as e:
         return e
-    return 'success'
+    return {"message":"success"}
 
 def evening()->str:
     """晚间休息的任务
@@ -150,7 +150,7 @@ def evening()->str:
     except TaskInfo as e:
         return e
 
-    return 'success'
+    return {"message":"success"}
 
 def rest()->str:
     date = Date().date
@@ -161,7 +161,7 @@ def rest()->str:
         check_(create_func(task='睡觉',date=date))
     except TaskInfo as e:
         return e
-    return "success"
+    return {"message":"success"}
 
 from chinese_calendar import is_workday
 from datetime import datetime
@@ -211,7 +211,8 @@ def complete():
     """
     date = Date().date
     task = receive()
-    push_task(task=task,date=date)
+    result = push_task(task=task,date=date)
+    return {"message":result}
 
 
 def add_tip(task:str):

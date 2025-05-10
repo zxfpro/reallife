@@ -11,7 +11,7 @@ setting = Setting()
 llm = BianXieAdapter()
 llm.set_model("gemini-2.5-flash-preview-04-17-nothinking")
 setting.llm = llm
-setting.debug = False
+setting.debug = True
 
-# Date(date = '2025-01-01',time = '14:40:10')
-Date()
+Date(date = '2024-12-02',time = '09:40:10')
+# Date()
