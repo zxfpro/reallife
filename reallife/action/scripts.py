@@ -24,7 +24,6 @@ def generate_schedule(text: str,habit: str="") -> str:
     :return: 生成的日程安排结果
     """
     llm = BianXieAdapter()
-
     template = Templates(TemplateType.GENERATE_SCHEDULE)
     current_utc_time = str(datetime.today())[:-7]
     prompt = template.format(text=text,habit=habit,current_utc_time = current_utc_time)

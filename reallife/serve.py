@@ -43,12 +43,20 @@ async def api_complete():
 
 # 封装 receive 函数 (保持不变)
 @app.get("/receive")
-async def api_receive():
+async def api_receive(request: Request):
     """
     调用 reallife.core.receive 函数，接收一些数据或信息。
+    可以通过应用状态 (app.state) 获取启动时传入的参数。
     """
-    result = receive()
+    # 从应用状态中获取 server 参数的值
+    # 使用 .get() 方法可以在键不存在时返回 None，避免 KeyError
+    # 或者提供一个默认值，例如 False
+    is_server_status = request.app.state.get("is_server_status", False)
+    print(is_server_status,"is_server_status")
+    result = receive(server=is_server_status)
     return {"result": result}
+
+
 
 if __name__ == "__main__":
     # 这是一个标准的 Python 入口点惯用法
@@ -69,7 +77,15 @@ if __name__ == "__main__":
         help='Specify alternate port [default: 8000]'
     )
 
+    parser.add_argument(
+        '--is-server',
+        action='store_true', # 如果命令行中包含 --is-server，则将 args.is_server 设置为 True
+        help='Set the server status for the receive function to True'
+    )
+
     args = parser.parse_args()
+
+    app.state.is_server_status = args.is_server
 
     # 使用 uvicorn.run() 来启动服务器
     # 参数对应于命令行选项
@@ -79,16 +95,3 @@ if __name__ == "__main__":
         port=args.port,
         reload=False  # 启用热重载
     )
-
-    """
-!curl http://127.0.0.1:8000/receive
-
-
-!curl -X POST http://127.0.0.1:8000/complete
-
-!curl -X POST \
-  -H "Content-Type: application/json" \
-  -d '{"task": "这是我的新任务描述2"}' \
-  http://127.0.0.1:8000/tip/add
-
-    """

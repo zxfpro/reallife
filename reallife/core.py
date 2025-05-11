@@ -33,7 +33,7 @@ def morning()->str:
     except TaskInfo as e:
         return e
 
-    return {"message":"success"}
+    return {"message":"任务没了"}
 
 def start_work(debug=True)->str:
     """开工
@@ -65,7 +65,7 @@ def start_work(debug=True)->str:
     except TaskInfo as e:
         return e
 
-    return {"message":"success"}
+    return {"message":"任务没了"}
 
 def tasks():
     """任务列表
@@ -119,7 +119,7 @@ def tasks():
     except TaskInfo as e:
         return e
 
-    return {"message":"success"}
+    return {"message":"任务结束"}
 
 def finish_work():
     """收工动作
@@ -139,7 +139,7 @@ def finish_work():
         check_(create_func(task='倒水茶水晚上',date=date))
     except TaskInfo as e:
         return e
-    return {"message":"success"}
+    return {"message":"任务没了"}
 
 def evening()->str:
     """晚间休息的任务
@@ -156,7 +156,7 @@ def evening()->str:
     except TaskInfo as e:
         return e
 
-    return {"message":"success"}
+    return {"message":"任务没了"}
 
 def rest()->str:
     date = Date().date
@@ -167,12 +167,12 @@ def rest()->str:
         check_(create_func(task='睡觉',date=date))
     except TaskInfo as e:
         return e
-    return {"message":"success"}
+    return {"message":"任务没了"}
 
 from chinese_calendar import is_workday
 from datetime import datetime
 
-def receive()->str:
+def receive(server:bool = True)->str:
     """领取一个任务(普通模式)
 
     Returns:
@@ -192,19 +192,19 @@ def receive()->str:
         time_19_00 = datetime.strptime(date + " 19:00:00", "%Y-%m-%d %H:%M:%S")
         time_23_00 = datetime.strptime(date + " 23:00:00", "%Y-%m-%d %H:%M:%S")
         
-        if time < time_8_50:
+        if time < time_8_50 and (server is True):
             return morning()
 
-        elif time_8_50 < time <= time_10_00:
+        elif time_8_50 < time <= time_10_00 and (server is True):
             return start_work(debug=DEBUG)
 
-        elif time_10_00 <= time < time_18_00:
+        elif time_10_00 <= time < time_18_00 and (server is False):
             return tasks()
 
-        elif time_18_00 <= time < time_19_00:
+        elif time_18_00 <= time < time_19_00 and (server is True):
             return finish_work()
 
-        elif time_19_00 <= time < time_23_00:
+        elif time_19_00 <= time < time_23_00 and (server is True):
             return evening()
 
         return 'success'

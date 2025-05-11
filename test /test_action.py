@@ -144,7 +144,3 @@ class Test_Script():
         kanb.add_tips(task)
 
 
-
-
-
-
