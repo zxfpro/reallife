@@ -52,7 +52,6 @@ async def api_receive(request: Request):
     # 使用 .get() 方法可以在键不存在时返回 None，避免 KeyError
     # 或者提供一个默认值，例如 False
     is_server_status = request.app.state.is_server_status
-    print(is_server_status,"is_server_status")
     result = receive(server=is_server_status)
     return {"result": result}
 
@@ -84,7 +83,6 @@ if __name__ == "__main__":
     )
 
     args = parser.parse_args()
-    print(args.is_server,'args.is_server')
     app.state.is_server_status = args.is_server
 
     # 使用 uvicorn.run() 来启动服务器
