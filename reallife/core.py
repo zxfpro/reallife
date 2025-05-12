@@ -192,19 +192,19 @@ def receive(server:bool = True)->str:
         time_19_00 = datetime.strptime(date + " 19:00:00", "%Y-%m-%d %H:%M:%S")
         time_23_00 = datetime.strptime(date + " 23:00:00", "%Y-%m-%d %H:%M:%S")
         
-        if time < time_8_50 and (server is True):
+        if time < time_8_50:
             return morning()
 
-        elif time_8_50 < time <= time_10_00 and (server is True):
+        elif time_8_50 < time <= time_10_00:
             return start_work(debug=DEBUG)
 
         elif time_10_00 <= time < time_18_00 and (server is False):
             return tasks()
 
-        elif time_18_00 <= time < time_19_00 and (server is True):
+        elif time_18_00 <= time < time_19_00:
             return finish_work()
 
-        elif time_19_00 <= time < time_23_00 and (server is True):
+        elif time_19_00 <= time < time_23_00:
             return evening()
 
         return 'success'
