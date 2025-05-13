@@ -49,7 +49,11 @@ class KanBanManager():
         with sync_obsidian_github("同步预备池"):
             for path in self.pathlib:
                 canvas_path=self.main_path+path
-                canvas = Canvas(file_path=canvas_path)
+                try:
+                    canvas = Canvas(file_path=canvas_path)
+                except FileNotFoundError as e:
+                    print(e)
+                    continue
                 with controlKanban(self.kanban) as kb:
                     project_name = canvas_path.rsplit('/',2)[-2] 
                     pauses = kb.get_tasks_in(pool=Pool.阻塞池)

@@ -9,7 +9,7 @@ WORK_CANVAS_PATH = config.get('WORK_CANVAS_PATH', [])
 
 setting = Setting()
 llm = BianXieAdapter()
-llm.set_model("gemini-2.5-flash-preview-04-17-nothinking")
+llm.set_model("gpt-4.1")
 setting.llm = llm
 setting.debug = True
 
