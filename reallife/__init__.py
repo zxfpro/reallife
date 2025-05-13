@@ -1,7 +1,7 @@
 """ 初始化 设定值"""
 
 from llmada import BianXieAdapter
-from .utils import Date, Setting, load_config
+from .utils import Setting, load_config, Date
 # Load configuration
 config = load_config()
 KANBAN_PATH = config.get('KANBAN_PATH', '')
@@ -13,5 +13,5 @@ llm.set_model("gemini-2.5-flash-preview-04-17-nothinking")
 setting.llm = llm
 setting.debug = True
 
-# Date(date = '2025-05-08',time = '13:40:10')
-Date()
+Date(date = '2025-05-09',time = '13:40:10')
+# Date()

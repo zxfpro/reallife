@@ -1,28 +1,71 @@
 """ 提供对外的方法 提供一些带状态的消息 """
 
 from datetime import datetime
-from .action.action import sync_calulate,sync_weight,sync_ready_pool,sync_order_pool,add_tips
-from .action.action import sync_run_pool, sync_note, sync_news, sync_note_night, recycle_tasks
-from .action.action import git_obsidian_pull, git_obsidian_push,git_obsidian_pull1,git_obsidian_push1
-
-from .nodes import clean_and_update,edit_coder, test_and_study
-from .nodes import design, meeting_and_talk
-from .nodes import task_failed,task_complete
-
-from .action.scripts import run_shortcut, display_dialog, display_dialog_for_end, judge_type
-from .utils import check_action_,check_, TaskInfo
-from .utils import create_func,push_task
+from chinese_calendar import is_workday
+from reallife import KANBAN_PATH,WORK_CANVAS_PATH
 from reallife import Date, Setting
 
 
-def morning()->str:
+from .actions.status import status
+from .actions.action import KanBanManager,APPIO
+from .utils import check_action_, push_task
+from .scripts.aifunc import judge_type
+from .scripts.applescript import ShortCut, Display
+
+from .tasks import clean_and_update, edit_coder, test_and_study
+from .tasks import design, meeting_and_talk
+from .tasks import task_failed,task_complete
+
+kbmanager = KanBanManager(kanban_path=KANBAN_PATH,pathlib=WORK_CANVAS_PATH)
+appio = APPIO()
+
+
+def create_func(task:str,date:str)->object:
+    """创建特定对象
+
+    Args:
+        task (str): 任务
+        date (str, optional): 日期. Defaults to date.
+
+    Returns:
+        object: 状态函数
+    """
+    @status(task=task,date=date)
+    def func_():
+        return task
+    return func_
+
+def check_(func):
+    """检查信息的封装
+
+    Args:
+        func (object): 信息方法
+
+    Raises:
+        TaskInfo: 遇到信息抛出消息等待被捕捉
+    """
+    result = func()
+    if result:
+        raise TaskInfo(result)
+    
+class TaskInfo(Exception):
+    """任务的抛出机制
+
+    Args:
+        Exception (_type_): 抛出
+    """
+    def __init__(self, message):
+        self.message = message
+        super().__init__(self.message)
+
+
+
+def morning(date:str)->str:
     """清晨动作
 
     Returns:
         str: 系统消息
     """
-    date = Date().date
-
     try:
         check_(create_func(task='记录灵感',date=date))
         check_(create_func(task='记录体重',date=date))
@@ -35,7 +78,7 @@ def morning()->str:
 
     return {"message":"任务没了"}
 
-def start_work(debug=True)->str:
+def start_work(date:str,debug=True)->str:
     """开工
 
     Args:
@@ -44,22 +87,16 @@ def start_work(debug=True)->str:
     Returns:
         str: 系统消息
     """
-    date = Date().date
     try:
         check_(create_func(task='上班打卡',date=date))
-        check_action_(git_obsidian_pull,debug)
-        check_action_(sync_ready_pool,debug)
-        check_action_(sync_order_pool,debug)
-        check_action_(sync_weight,debug)
-        check_action_(git_obsidian_push,debug)
+        check_action_(kbmanager.sync_ready,debug)
+        check_action_(kbmanager.sync_order,debug)
+        check_action_(kbmanager.sync_weight,debug)
         check_(create_func(task='调整优先级',date=date))
-        check_action_(git_obsidian_pull1,debug)
-        check_action_(sync_run_pool,debug)
+        check_action_(kbmanager.sync_run,debug)
         # check_action_(sync_news) # 对方改版了,等着用pypeteer去做吧
-        check_action_(git_obsidian_push1,debug)
-        check_action_(sync_calulate,debug)
-        check_action_(sync_note,debug)
-        # check_(create_func(task='拉取git',date=date))
+        check_action_(appio.sync_calulate,debug)
+        check_action_(appio.sync_notes,debug)
         check_(create_func(task='倒水茶水',date=date))
         # bulid知识库
     except TaskInfo as e:
@@ -67,17 +104,16 @@ def start_work(debug=True)->str:
 
     return {"message":"任务没了"}
 
-def tasks():
+def tasks(date:str):
     """任务列表
 
     Returns:
         str: 系统消息
     """
-    date = Date().date
     try:
         check_(create_func(task='写下灵感',date=date))
         check_(create_func(task='跟进阻塞池',date=date))
-        task = run_shortcut("获取任务")
+        task = ShortCut.run_shortcut("获取任务")
         print("task:",task)
         if not task:
             return '无任务'
@@ -96,8 +132,7 @@ def tasks():
             print('新的类别')
             # 开会与对齐
             meeting_and_talk(task)
-
-        task_result = display_dialog_for_end("判断",f"任务是否完成: ",button_text="complete",button_text2="blockage",button_cancel=True)
+        task_result = Display.display_dialog("判断",f"任务是否完成: ",buttons='"complete","blockage"',button_cancel = True)
 
         if task_result == 'complete':
             # 完成任务
@@ -112,26 +147,24 @@ def tasks():
             # 完成未任务
             task_failed(task=task)
 
-        
         # 移除完成的任务
-        run_shortcut("移除完成的任务",task)
+        task = ShortCut.run_shortcut("移除完成的任务",task)
 
     except TaskInfo as e:
         return e
 
     return {"message":"任务结束"}
 
-def finish_work():
+def finish_work(date:str,debug=True):
     """收工动作
 
     Returns:
         str: 系统信息
     """
-    date = Date().date
     try:
         #TODO 知识库整理
-        check_action_(recycle_tasks)
-        check_action_(sync_note_night)
+        check_action_(kbmanager.sync_weight,debug)
+        check_action_(appio.sync_notes,debug)
         check_(create_func(task='检查和收集咨询',date=date))
         check_(create_func(task='检查是否仍在禅模式',date=date))
         check_(create_func(task='检测git提交',date=date))
@@ -141,13 +174,12 @@ def finish_work():
         return e
     return {"message":"任务没了"}
 
-def evening()->str:
+def evening(date:str)->str:
     """晚间休息的任务
 
     Returns:
         str: 系统消息
     """
-    date = Date().date
     try:
         check_(create_func(task='整理家里和猫猫',date=date))
         check_(create_func(task='晚上洗漱,刷牙,护肤',date=date))
@@ -158,9 +190,9 @@ def evening()->str:
 
     return {"message":"任务没了"}
 
-def rest()->str:
-    date = Date().date
+def rest(date:str)->str:
     try:
+        #TODO 强化型健身  1周一次 在突破技能   5000米 + 负重 + 拳击
         check_(create_func(task='吃早饭',date=date))
         check_(create_func(task='洗漱',date=date))
         check_(create_func(task='锻炼',date=date))
@@ -169,8 +201,6 @@ def rest()->str:
         return e
     return {"message":"任务没了"}
 
-from chinese_calendar import is_workday
-from datetime import datetime
 
 def receive(server:bool = True)->str:
     """领取一个任务(普通模式)
@@ -181,9 +211,7 @@ def receive(server:bool = True)->str:
     time = Date().time
     date = Date().date
     DEBUG = Setting().debug
-    date_obj = datetime.strptime(date, '%Y-%m-%d').date()
-
-    if is_workday(date_obj):
+    if is_workday(datetime.strptime(date, '%Y-%m-%d').date()):
         time = datetime.strptime(f"{date} {time}", "%Y-%m-%d %H:%M:%S")
         # Create datetime objects once to avoid repetition
         time_8_50 = datetime.strptime(date + " 8:50:00", "%Y-%m-%d %H:%M:%S")
@@ -193,23 +221,23 @@ def receive(server:bool = True)->str:
         time_23_00 = datetime.strptime(date + " 23:00:00", "%Y-%m-%d %H:%M:%S")
         
         if time < time_8_50:
-            return morning()
+            return morning(date=date)
 
         elif time_8_50 < time <= time_10_00:
-            return start_work(debug=DEBUG)
+            return start_work(date=date,debug=DEBUG)
 
         elif time_10_00 <= time < time_18_00 and (server is False):
-            return tasks()
+            return tasks(date=date)
 
         elif time_18_00 <= time < time_19_00:
-            return finish_work()
+            return finish_work(date=date)
 
         elif time_19_00 <= time < time_23_00:
-            return evening()
+            return evening(date=date)
 
         return 'success'
     else:
-        return rest()
+        return rest(date=date)
 
 
 def complete():
@@ -222,8 +250,4 @@ def complete():
 
 
 def add_tip(task:str):
-    return add_tips(task)
-
-
-
-#TODO 强化型健身  1周一次 在突破技能   5000米 + 负重 + 拳击
+    return kbmanager.add_tips(task)

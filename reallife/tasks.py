@@ -1,8 +1,44 @@
 """ 执行任务 """
-from .action.action import KanBanManager
-from .utils import git_commit_something, failed_safe, task_with_time
-from .action.scripts import display_dialog, get_choice_from_applescript
+from .actions.action import KanBanManager
 from . import KANBAN_PATH, WORK_CANVAS_PATH
+from .scripts.applescript import Display,ShortCut
+import os
+
+
+def git_commit_something(repo:str,commit:str):
+    """提交git commit 
+
+    Args:
+        repo (str): 仓库
+        commit (str): 提交信息
+    """
+    os.system(f"cd /Users/zhaoxuefeng/GitHub/{repo};git add .; \
+              git commit -m '{commit}' --allow-empty")
+
+
+
+def failed_safe():
+    # 安全开启 放弃
+    '''
+    查询session状态
+    如果 当前session 状态是 session
+        放弃session
+    否则
+        pass
+    结束
+    '''
+    ShortCut.run_shortcut(shortcut_name="安全停止")
+
+
+def task_with_time(task_name:str,time:int=1):
+    """计时任务
+
+    Args:
+        task_name (str): 任务名
+        time (int, optional): 费用. Defaults to 1.
+    """
+    ShortCut.run_shortcut(shortcut_name="执行计时任务",params=f"{task_name}${time}")
+    Display.display_dialog("计时结束", "需要结束计时任务吗?",buttons = '"结束"',button_cancel=False)
 
 
 
@@ -15,23 +51,23 @@ def edit_coder(task:str):
 
     # 是否创建项目
     create_proj = False
-    display_dialog("编写代码",f"是否创建新项目: {task}",button_text="开始",button_cancel=False)
-    create_proj = display_dialog("编写代码",f"是否创建新项目: ",button_text="create",button_cancel=True)
+
+    Display.display_dialog("编写代码",f"是否创建新项目: {task}",buttons = '"开始`"',button_cancel=False)
+    create_proj = Display.display_dialog("编写代码",f"是否创建新项目: ",buttons = '"创建"',button_cancel=True)
     if create_proj == 'create':
-        display_dialog("创建项目","1. pypi查重 \n  2. obsidian创建Reader | Docs \n \
-                       3创建github仓库",button_text="确认",button_cancel=False)
-        display_dialog("创建项目","初始化 uv init and 修改解释器 \
+        Display.display_dialog("创建项目","1. pypi查重 \n  2. obsidian创建Reader | Docs \n \
+                       3创建github仓库",buttons = '"确认"',button_cancel=False)
+        Display.display_dialog("创建项目","初始化 uv init and 修改解释器 \
                        mkdocs new .  update  文档推送  创建文件夹,\
                        测试文件等  \
-                       uv build publish  ",button_text="确认", button_cancel=False)
+                       uv build publish  ",buttons = '"确认"', button_cancel=False)
     print(task,'task')
     # TODO
     lst = ['coderTools','grapher','kanban']
 
-    get_choice_from_applescript()
     all_options = ['coderTools','grapher','kanban','llmada','networkx','ob_ragtools','obsidian','promptlib',
                    'pypidoctor','readerLLamaIndex','reallife','tools','aiworker']
-    choice = get_choice_from_applescript(
+    choice = Display.multiple_selection_boxes(
         prompt_text="请选择作为工作区的仓库:",
         list_title="工作区",
         options=all_options,
@@ -43,13 +79,13 @@ def edit_coder(task:str):
         select = None
         raise Exception('选择失效')
     #
-    display_dialog("编码与练习","基础逻辑",button_text="确认")
+    Display.display_dialog("编码与练习","基础逻辑",buttons = '"确认"',)
     task_with_time(task_name = task,time=40)
-    display_dialog("编码与练习","测试与测试用例",button_text="确认")
+    Display.display_dialog("编码与练习","测试与测试用例",buttons = '"确认"',)
     task_with_time(task_name = task,time=30)
-    display_dialog("编码与练习","整理代码,注释,格式,文档与发布",button_text="确认")
+    Display.display_dialog("编码与练习","整理代码,注释,格式,文档与发布",buttons = '"确认"',)
     task_with_time(task_name = task,time=20)
-    display_dialog("编码与练习","环境与推送新版本",button_text="确认")
+    Display.display_dialog("编码与练习","环境与推送新版本",buttons = '"确认"',)
     task_with_time(task_name = task,time=10)
     # 仓库$编写目标
     git_commit_something(select,task)
@@ -62,9 +98,9 @@ def test_and_study(task:str):
         task (str): 任务
     """
     # 实验与学习
-    display_dialog("实验与学习",f"请打开飞书会议, 标题为{task}",button_text="确认",button_cancel=False)
+    Display.display_dialog("实验与学习",f"请打开飞书会议, 标题为{task}",buttons = '"确认"',button_cancel=False)
     task_with_time(task_name = task,time=60)
-    display_dialog("实验与学习","自我审视+ 反思 + 分析笔记",button_text="确认",button_cancel=False)
+    Display.display_dialog("实验与学习","自我审视+ 反思 + 分析笔记",buttons = '"确认"',button_cancel=False)
     failed_safe()
 
 def clean_and_update(task:str):
@@ -73,7 +109,7 @@ def clean_and_update(task:str):
     Args:
         task (str): 任务
     """
-    display_dialog("整理与优化",f"是否可以开始整理与优化: {task}",button_text="可以",button_cancel=False)
+    Display.display_dialog("整理与优化",f"是否可以开始整理与优化: {task}",buttons = '"可以"',button_cancel=False)
     task_with_time(task_name = task,time=20)
     failed_safe()
 
@@ -83,7 +119,7 @@ def design(task:str):
     Args:
         task (str): 任务名
     """
-    display_dialog("设计",f"准备开始设计: {task}",button_text="开始",button_cancel=False)
+    Display.display_dialog("设计",f"准备开始设计: {task}",buttons = '"开始"',button_cancel=False)
     task_with_time(task_name = task,time=60)
     git_commit_something("obsidian",task)
     failed_safe()
@@ -94,7 +130,7 @@ def meeting_and_talk(task:str):
     Args:
         task (str): 任务名
     """
-    display_dialog("开会与对齐",f"准备开会与对齐: {task}",button_text="开始",button_cancel=False)
+    Display.display_dialog("开会与对齐",f"准备开会与对齐: {task}",buttons = '"开始"',button_cancel=False)
     task_with_time(task_name = task,time=60)
     failed_safe()
 

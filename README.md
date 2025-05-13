@@ -28,3 +28,5 @@ bash run_test.sh
 ```
 
 
+pytest test/test_fake.py -s
+pytest test/test_fake.py::Test_KanBan -s

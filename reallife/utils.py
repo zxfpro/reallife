@@ -5,9 +5,6 @@ import os
 import requests
 import importlib.resources
 import yaml
-from .action.scripts import display_dialog,run_shortcut
-
-from .action.utils import create_func
 
 def push_task(task:str, date:str):
     """推任务上去
@@ -52,28 +49,7 @@ def load_config():
     # with open('reallife/config.yaml', 'r', encoding='utf-8') as f:
     #     return yaml.safe_load(f)
 
-class TaskInfo(Exception):
-    """任务的抛出机制
 
-    Args:
-        Exception (_type_): 抛出
-    """
-    def __init__(self, message):
-        self.message = message
-        super().__init__(self.message)
-
-def check_(func):
-    """检查信息的封装
-
-    Args:
-        func (object): 信息方法
-
-    Raises:
-        TaskInfo: 遇到信息抛出消息等待被捕捉
-    """
-    result = func()
-    if result:
-        raise TaskInfo(result)
 
 def check_action_(func,debug=True):
     """一个执行动作的配装
@@ -85,41 +61,6 @@ def check_action_(func,debug=True):
     result = func()
     if result and debug:
         print(func.__name__)
-
-def git_commit_something(repo:str,commit:str):
-    """提交git commit 
-
-    Args:
-        repo (str): 仓库
-        commit (str): 提交信息
-    """
-    os.system(f"cd /Users/zhaoxuefeng/GitHub/{repo};git add .; \
-              git commit -m '{commit}' --allow-empty")
-
-
-def failed_safe():
-    # 安全开启 放弃
-    '''
-    查询session状态
-    如果 当前session 状态是 session
-        放弃session
-    否则
-        pass
-    结束
-    '''
-    run_shortcut(shortcut_name="安全停止")
-
-
-def task_with_time(task_name:str,time:int=1):
-    """计时任务
-
-    Args:
-        task_name (str): 任务名
-        time (int, optional): 费用. Defaults to 1.
-    """
-    run_shortcut(shortcut_name="执行计时任务",params=f"{task_name}${time}")
-    display_dialog("计时结束", "需要结束计时任务吗?",button_text="结束",button_cancel=False)
-
 
 
 class Date:
@@ -141,6 +82,11 @@ class Date:
             self.date = date or datetime.today().strftime("%Y-%m-%d")
             self.time = time or datetime.today().strftime("%H:%M:%S")
 
+    def set_date(self,date):
+        self.date = date
+
+    def set_time(self,time):
+        self.time = time
 
 class Setting:
     """日期, 来控制系统时间

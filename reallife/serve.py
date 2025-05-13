@@ -2,7 +2,7 @@ from fastapi import FastAPI, Request
 from pydantic import BaseModel # 导入 BaseModel
 
 try:
-    from reallife.core import add_tip, complete, receive
+    from reallife.main import add_tip, complete, receive
 except ImportError as e:
     print(f"Error importing from reallife.core: {e}")
     print("Please ensure 'reallife' directory is in your Python path and contains 'core.py'.")
