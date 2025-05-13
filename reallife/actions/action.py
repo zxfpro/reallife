@@ -168,7 +168,7 @@ class KanBanManager():
         return 'success'
 
     @status(task="同步体重",date=date,run_only=True)
-    def sync_weight(self,date)->str:
+    def sync_weight(self)->str:
         """
         同步体重
         """
