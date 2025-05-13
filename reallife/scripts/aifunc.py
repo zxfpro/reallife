@@ -23,8 +23,7 @@ def extract_type_code(text: str)->str:
 
 def give_a_task_time(task:str)->str:
     llm = BianXieAdapter()
-    llm.set_model("gemini-2.5-flash-preview-04-17-nothinking")
-
+    llm.set_model("o1-mini")
     template = Templates(TemplateType.ESTIMATE_DURATION)
     prompt = template.format(task=task)
 
@@ -38,6 +37,7 @@ def generate_schedule(text: str,habit: str="") -> str:
     :return: 生成的日程安排结果
     """
     llm = BianXieAdapter()
+    llm.set_model("o3-mini")
     template = Templates(TemplateType.GENERATE_SCHEDULE)
     current_utc_time = str(datetime.today())[:-7]
     prompt = template.format(text=text,habit=habit,current_utc_time = current_utc_time)
