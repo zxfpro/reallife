@@ -28,7 +28,10 @@ def give_a_task_time(task:str)->str:
     prompt = template.format(task=task)
 
     completion = llm.product(prompt)
-    return completion + " "+ task
+    if completion and len(completion)<5:
+        return completion + " "+ task
+    else:
+        return "2P" + " "+ task
 
 def generate_schedule(text: str,habit: str="") -> str:
     """
