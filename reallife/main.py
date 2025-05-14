@@ -111,6 +111,7 @@ def tasks(date:str):
         str: 系统消息
     """
     try:
+        print(1234,'123')
         check_(create_func(task='写下灵感',date=date))
         check_(create_func(task='跟进阻塞池',date=date))
         task = ShortCut.run_shortcut("获取任务")
@@ -219,6 +220,7 @@ def receive(server:bool = True)->str:
         time_18_00 = datetime.strptime(date + " 18:00:00", "%Y-%m-%d %H:%M:%S")
         time_19_00 = datetime.strptime(date + " 19:00:00", "%Y-%m-%d %H:%M:%S")
         time_23_00 = datetime.strptime(date + " 23:00:00", "%Y-%m-%d %H:%M:%S")
+
         
         if time < time_8_50:
             return morning(date=date)
