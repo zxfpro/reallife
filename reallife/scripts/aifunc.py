@@ -3,6 +3,7 @@
 from datetime import datetime
 from promptlibz import Templates,TemplateType
 from llmada import BianXieAdapter
+from llmada import GoogleAdapter
 
 import re
 
@@ -22,8 +23,7 @@ def extract_type_code(text: str)->str:
 
 
 def give_a_task_time(task:str)->str:
-    llm = BianXieAdapter()
-    llm.set_model("o1-mini")
+    llm = GoogleAdapter()
     template = Templates(TemplateType.ESTIMATE_DURATION)
     prompt = template.format(task=task)
 
