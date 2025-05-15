@@ -59,8 +59,7 @@ def check_(func):
         if result:
             raise TaskInfo(result)
     except Exception as e:
-        logging.error(f"Error during check_ execution: {e}")
-        raise  # Re-raise the exception after logging
+        raise e
 
 
 class TaskInfo(Exception):
@@ -137,10 +136,8 @@ def tasks(date: str) -> dict:
         dict: 系统消息
     """
     try:
-        logging.info('Starting tasks function')
-        check_(create_func(task='写下灵感', date=date))
-        check_(create_func(task='跟进阻塞池', date=date))
-
+        check_(create_func(task='写下灵感',date=date))
+        check_(create_func(task='跟进阻塞池',date=date))
         task = ShortCut.run_shortcut("获取任务")
         logging.info(f"Task obtained from shortcut: {task}")
 
@@ -275,13 +272,21 @@ def receive(server: bool = True) -> dict:
     Returns:
         dict: 任务信息或系统消息
     """
-    try:
-        current_date_obj = Date()
-        current_time_str = current_date_obj.time
-        current_date_str = current_date_obj.date
-        debug_mode = Setting().debug
 
-        logging.info(f"Receive called. Date: {current_date_str}, Time: {current_time_str}, Server mode: {server}")
+    time = Date().time
+    date = Date().date
+    DEBUG = Setting().debug
+    if is_workday(datetime.strptime(date, '%Y-%m-%d').date()):
+        time = datetime.strptime(f"{date} {time}", "%Y-%m-%d %H:%M:%S")
+        # Create datetime objects once to avoid repetition
+        time_8_50 = datetime.strptime(date + " 8:50:00", "%Y-%m-%d %H:%M:%S")
+        time_10_00 = datetime.strptime(date + " 10:00:00", "%Y-%m-%d %H:%M:%S") 
+        time_18_00 = datetime.strptime(date + " 18:00:00", "%Y-%m-%d %H:%M:%S")
+        time_19_00 = datetime.strptime(date + " 19:00:00", "%Y-%m-%d %H:%M:%S")
+        time_23_00 = datetime.strptime(date + " 23:00:00", "%Y-%m-%d %H:%M:%S")
+        
+        if time < time_8_50:
+            return morning(date=date)
 
         date_obj = datetime.strptime(current_date_str, '%Y-%m-%d').date()
 
