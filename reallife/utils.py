@@ -108,3 +108,43 @@ class Setting:
             self.debug = None
 
 
+from .actions.status import status
+
+def create_func(task:str,date:str)->object:
+    """创建特定对象
+
+    Args:
+        task (str): 任务
+        date (str, optional): 日期. Defaults to date.
+
+    Returns:
+        object: 状态函数
+    """
+    @status(task=task,date=date)
+    def func_():
+        return task
+    return func_
+
+def check_(func):
+    """检查信息的封装
+
+    Args:
+        func (object): 信息方法
+
+    Raises:
+        TaskInfo: 遇到信息抛出消息等待被捕捉
+    """
+    result = func()
+    if result:
+        raise TaskInfo(result)
+    
+class TaskInfo(Exception):
+    """任务的抛出机制
+
+    Args:
+        Exception (_type_): 抛出
+    """
+    def __init__(self, message):
+        self.message = message
+        super().__init__(self.message)
+

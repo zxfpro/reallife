@@ -6,7 +6,7 @@ from reallife import KANBAN_PATH,WORK_CANVAS_PATH
 from reallife import Date, Setting
 
 
-from .actions.status import status
+
 from .actions.action import KanBanManager,APPIO
 from .utils import check_action_, push_task
 from .scripts.aifunc import judge_type
@@ -15,49 +15,49 @@ from .scripts.applescript import ShortCut, Display
 from .tasks import clean_and_update, edit_coder, test_and_study
 from .tasks import design, meeting_and_talk
 from .tasks import task_failed,task_complete
+from .utils import check_,create_func, TaskInfo
 
 kbmanager = KanBanManager(kanban_path=KANBAN_PATH,pathlib=WORK_CANVAS_PATH)
 appio = APPIO()
 
 
-def create_func(task:str,date:str)->object:
-    """创建特定对象
-
-    Args:
-        task (str): 任务
-        date (str, optional): 日期. Defaults to date.
+def receive(server:bool = False)->str:
+    """领取一个任务(普通模式)
 
     Returns:
-        object: 状态函数
+        str: 任务信息
     """
-    @status(task=task,date=date)
-    def func_():
-        return task
-    return func_
+    time = Date().time
+    date = Date().date
+    DEBUG = Setting().debug
+    if is_workday(datetime.strptime(date, '%Y-%m-%d').date()):
+        time = datetime.strptime(f"{date} {time}", "%Y-%m-%d %H:%M:%S")
+        # Create datetime objects once to avoid repetition
+        time_8_50 = datetime.strptime(date + " 8:50:00", "%Y-%m-%d %H:%M:%S")
+        time_10_00 = datetime.strptime(date + " 10:00:00", "%Y-%m-%d %H:%M:%S") 
+        time_18_00 = datetime.strptime(date + " 18:00:00", "%Y-%m-%d %H:%M:%S")
+        time_19_00 = datetime.strptime(date + " 19:00:00", "%Y-%m-%d %H:%M:%S")
+        time_23_00 = datetime.strptime(date + " 23:00:00", "%Y-%m-%d %H:%M:%S")
 
-def check_(func):
-    """检查信息的封装
+        
+        if time < time_8_50:
+            return morning(date=date)
 
-    Args:
-        func (object): 信息方法
+        elif time_8_50 < time <= time_10_00:
+            return start_work(date=date,debug=DEBUG)
 
-    Raises:
-        TaskInfo: 遇到信息抛出消息等待被捕捉
-    """
-    result = func()
-    if result:
-        raise TaskInfo(result)
-    
-class TaskInfo(Exception):
-    """任务的抛出机制
+        elif time_10_00 <= time < time_18_00 and (server is False):
+            return tasks(date=date)
 
-    Args:
-        Exception (_type_): 抛出
-    """
-    def __init__(self, message):
-        self.message = message
-        super().__init__(self.message)
+        elif time_18_00 <= time < time_19_00:
+            return finish_work(date=date)
 
+        elif time_19_00 <= time < time_23_00:
+            return evening(date=date)
+
+        return 'success'
+    else:
+        return rest(date=date)
 
 
 def morning(date:str)->str:
@@ -111,11 +111,9 @@ def tasks(date:str):
         str: 系统消息
     """
     try:
-        print(1234,'123')
         check_(create_func(task='写下灵感',date=date))
         check_(create_func(task='跟进阻塞池',date=date))
         task = ShortCut.run_shortcut("获取任务")
-        print("task:",task)
         if not task:
             return '无任务'
         task_type = judge_type(task)
@@ -202,44 +200,6 @@ def rest(date:str)->str:
         return e
     return {"message":"任务没了"}
 
-
-def receive(server:bool = True)->str:
-    """领取一个任务(普通模式)
-
-    Returns:
-        str: 任务信息
-    """
-    time = Date().time
-    date = Date().date
-    DEBUG = Setting().debug
-    if is_workday(datetime.strptime(date, '%Y-%m-%d').date()):
-        time = datetime.strptime(f"{date} {time}", "%Y-%m-%d %H:%M:%S")
-        # Create datetime objects once to avoid repetition
-        time_8_50 = datetime.strptime(date + " 8:50:00", "%Y-%m-%d %H:%M:%S")
-        time_10_00 = datetime.strptime(date + " 10:00:00", "%Y-%m-%d %H:%M:%S") 
-        time_18_00 = datetime.strptime(date + " 18:00:00", "%Y-%m-%d %H:%M:%S")
-        time_19_00 = datetime.strptime(date + " 19:00:00", "%Y-%m-%d %H:%M:%S")
-        time_23_00 = datetime.strptime(date + " 23:00:00", "%Y-%m-%d %H:%M:%S")
-
-        
-        if time < time_8_50:
-            return morning(date=date)
-
-        elif time_8_50 < time <= time_10_00:
-            return start_work(date=date,debug=DEBUG)
-
-        elif time_10_00 <= time < time_18_00 and (server is False):
-            return tasks(date=date)
-
-        elif time_18_00 <= time < time_19_00:
-            return finish_work(date=date)
-
-        elif time_19_00 <= time < time_23_00:
-            return evening(date=date)
-
-        return 'success'
-    else:
-        return rest(date=date)
 
 
 def complete():

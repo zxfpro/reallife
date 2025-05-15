@@ -16,6 +16,7 @@ def status(task:str,date:str,run_only = False):
         def wrapper(*args, **kwargs):
             response = requests.get(
                 f"http://101.201.244.227:8000/action/{task}/{date}/status",timeout=20)
+            print(response.json(),'vvv')
             if response.json().get('status') == '未执行':
                 result = func(*args, **kwargs)
             else:
