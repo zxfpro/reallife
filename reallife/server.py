@@ -3,6 +3,7 @@ from pydantic import BaseModel # 导入 BaseModel
 
 try:
     from reallife.main import add_tip, complete, receive
+    from reallife.server_function import 
 except ImportError as e:
     print(f"Error importing from reallife.core: {e}")
     print("Please ensure 'reallife' directory is in your Python path and contains 'core.py'.")
