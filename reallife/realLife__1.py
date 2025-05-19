@@ -20,27 +20,20 @@ from .task_func__1 import TaskManager
 
 task_manager = TaskManager()
 
+
 def get_current_task_for_user(manager: TaskManager):
     """
-    获取当前应该向用户展示的任务。
-    只有当所有之前的任务都完成后，才会展示下一个任务。
-    如果当前任务未完成，每次都会返回当前任务。
+    获取当前应该向用户展示的任务，并触发其执行。
     """
-    # 检查所有任务的状态
-    all_tasks = manager._tasks # 假设 TaskManager 有一个方法可以获取所有任务
-    
-    # 找到第一个未完成的任务
-    current_task = None
-    for task_name, task_status in all_tasks.items():
-        if not manager.get_task_status(task_name).endswith("完成"):
-            current_task = task_name
-            break
-            
-    if current_task:
-        return f"当前任务：{current_task}"
-    else:
-        return "所有任务已完成！"
-    
+    # 直接调用 TaskManager 中获取并执行第一个未完成任务的方法
+    return manager.execute_first_unfinished_task()
+
+def complete(task_name:str):
+    """
+    完成指定名称的任务。
+    """
+    # task_manager.complete_task(task_name) # 移除重复调用
+    return task_manager.complete_task(task_name)
 
 # 初始化子系统实例
 # kbmanager = KanBanManager(kanban_path=KANBAN_PATH, pathlib=WORK_CANVAS_PATH)
