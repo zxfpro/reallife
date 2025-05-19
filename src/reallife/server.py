@@ -1,96 +1,91 @@
-from fastapi import FastAPI, Request
-from pydantic import BaseModel # 导入 BaseModel
-
-try:
-    from reallife.main import add_tip, complete, receive
-    from reallife.server_function import 
-except ImportError as e:
-    print(f"Error importing from reallife.core: {e}")
-    print("Please ensure 'reallife' directory is in your Python path and contains 'core.py'.")
-    # raise e
+%%writefile main.py
+from fastapi import FastAPI
+from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.triggers.cron import CronTrigger
+import time
 
 app = FastAPI()
 
-# 定义一个用于接收 /tip/add 请求体的 Pydantic 模型
-class TaskInput(BaseModel):
-    task: str
+def task_daily_midnight():
+    """
+    每天凌晨 0:00 执行的任务
+    """
+    print(f"任务：每天凌晨 0:00 执行。当前时间：{time.ctime()}")
 
-# 定义一个根路径，方便测试服务是否启动
+def task_weekday_3am():
+    """
+    工作日 3:00 执行的任务
+    """
+    print(f"任务：工作日 3:00 执行。当前时间：{time.ctime()}")
+
+def task_weekday_850am():
+    """
+    工作日 8:50 执行的任务
+    """
+    print(f"任务：工作日 8:50 执行。当前时间：{time.ctime()}")
+
+def task_weekday_10am():
+    """
+    工作日 10:00 执行的任务
+    """
+    print(f"任务：工作日 10:00 执行。当前时间：{time.ctime()}")
+
+def task_weekday_6pm():
+    """
+    工作日 18:00 执行的任务
+    """
+    print(f"任务：工作日 18:00 执行。当前时间：{time.ctime()}")
+
+def task_weekday_7pm():
+    """
+    工作日 19:00 执行的任务
+    """
+    print(f"任务：工作日 19:00 执行。当前时间：{time.ctime()}")
+
+def task_weekend_5am():
+    """
+    休息日 5:00 执行的任务
+    """
+    print(f"任务：休息日 5:00 执行。当前时间：{time.ctime()}")
+
+scheduler = BackgroundScheduler()
+
+# 每天的凌晨 0:00
+scheduler.add_job(task_daily_midnight, CronTrigger(hour=0, minute=0))
+
+# 工作日 (周一到周五) 的 3:00
+scheduler.add_job(task_weekday_3am, CronTrigger(hour=3, minute=0, day_of_week='mon-fri'))
+
+# 工作日 (周一到周五) 的 8:50
+scheduler.add_job(task_weekday_850am, CronTrigger(hour=8, minute=50, day_of_week='mon-fri'))
+
+# 工作日 (周一到周五) 的 10:00
+scheduler.add_job(task_weekday_10am, CronTrigger(hour=10, minute=0, day_of_week='mon-fri'))
+
+# 工作日 (周一到周五) 的 18:00
+scheduler.add_job(task_weekday_6pm, CronTrigger(hour=18, minute=0, day_of_week='mon-fri'))
+
+# 工作日 (周一到周五) 的 19:00
+scheduler.add_job(task_weekday_7pm, CronTrigger(hour=19, minute=0, day_of_week='mon-fri'))
+
+# 休息日 (周六和周日) 的 5:00
+scheduler.add_job(task_weekend_5am, CronTrigger(hour=5, minute=0, day_of_week='sat,sun'))
+
+
+@app.on_event("startup")
+async def startup_event():
+    print("应用启动中...")
+    scheduler.start()
+    print("APScheduler 启动")
+
+@app.on_event("shutdown")
+def shutdown_event():
+    print("应用关闭中...")
+    scheduler.shutdown()
+    print("APScheduler 关闭")
+
 @app.get("/")
 async def read_root():
-    return {"message": "RealLife Core API is running"}
+    return {"message": "FastAPI and APScheduler configured."}
 
-# 封装 add_tip 函数
-# 现在接受一个 TaskInput 模型作为请求体
-@app.post("/tip/add")
-# 将参数类型改为 TaskInput 模型，并给一个默认值（表示它来自请求体）
-async def api_add_tip(task_input: TaskInput): # 参数名可以随意，但类型是 TaskInput
-    """
-    调用 reallife.core.add_tip 函数，为任务添加提示。
-    接收一个 JSON 对象，例如: {"task": "你的任务描述"}
-    """
-    # 从模型实例中获取 task 字符串
-    result = add_tip(task_input.task)
-    return {"result": result} # 可以根据 add_tip 的实际返回值调整结构
-
-# 封装 complete 函数 (保持不变)
-@app.post("/complete")
-async def api_complete():
-    """
-    调用 reallife.core.complete 函数，完成任务。
-    """
-    result = complete()
-    return {"result": result}
-
-# 封装 receive 函数 (保持不变)
-@app.get("/receive")
-async def api_receive(request: Request):
-    """
-    调用 reallife.core.receive 函数，接收一些数据或信息。
-    可以通过应用状态 (app.state) 获取启动时传入的参数。
-    """
-    # 从应用状态中获取 server 参数的值
-    # 使用 .get() 方法可以在键不存在时返回 None，避免 KeyError
-    # 或者提供一个默认值，例如 False
-    is_server_status = request.app.state.is_server_status
-    result = receive(server=is_server_status)
-    return {"result": result}
-
-
-
-if __name__ == "__main__":
-    # 这是一个标准的 Python 入口点惯用法
-    # 当脚本直接运行时 (__name__ == "__main__")，这里的代码会被执行
-    # 当通过 python -m YourPackageName 执行 __main__.py 时，__name__ 也是 "__main__"
-    import argparse
-    import uvicorn
-
-    parser = argparse.ArgumentParser(
-        description="Start a simple HTTP server similar to http.server."
-    )
-    parser.add_argument(
-        'port',
-        metavar='PORT',
-        type=int,
-        nargs='?', # 端口是可选的
-        default=8001,
-        help='Specify alternate port [default: 8000]'
-    )
-
-    parser.add_argument(
-        '--is-server',
-        action='store_true', # 如果命令行中包含 --is-server，则将 args.is_server 设置为 True
-        help='Set the server status for the receive function to True'
-    )
-
-    args = parser.parse_args()
-    app.state.is_server_status = args.is_server
-
-    # 使用 uvicorn.run() 来启动服务器
-    # 参数对应于命令行选项
-    uvicorn.run(
-        app,
-        host="0.0.0.0",
-        port=args.port,
-        reload=False  # 启用热重载
-    )
+# 运行命令: uvicorn main:app --reload

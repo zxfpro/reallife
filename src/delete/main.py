@@ -2,8 +2,8 @@
 
 from datetime import datetime
 from chinese_calendar import is_workday
-from reallife import KANBAN_PATH,WORK_CANVAS_PATH
-from reallife import Date, Setting
+from delete import KANBAN_PATH,WORK_CANVAS_PATH
+from delete import Date, Setting
 
 
 
