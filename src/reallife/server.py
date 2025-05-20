@@ -1,8 +1,12 @@
-%%writefile main.py
 from fastapi import FastAPI
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
 import time
+
+from .cli import receive_task, complete_task, list_all_tasks
+from .workday_facade import WorkdayFacade
+
+workday_facade = WorkdayFacade()
 
 app = FastAPI()
 
@@ -11,42 +15,48 @@ def task_daily_midnight():
     每天凌晨 0:00 执行的任务
     """
     print(f"任务：每天凌晨 0:00 执行。当前时间：{time.ctime()}")
+    workday_facade.clear()
 
 def task_weekday_3am():
     """
     工作日 3:00 执行的任务
     """
     print(f"任务：工作日 3:00 执行。当前时间：{time.ctime()}")
+    workday_facade._morning_tasks()
 
 def task_weekday_850am():
     """
     工作日 8:50 执行的任务
     """
     print(f"任务：工作日 8:50 执行。当前时间：{time.ctime()}")
+    workday_facade._start_work_tasks()
 
 def task_weekday_10am():
     """
     工作日 10:00 执行的任务
     """
-    print(f"任务：工作日 10:00 执行。当前时间：{time.ctime()}")
+    workday_facade.add_person_tasks()
 
 def task_weekday_6pm():
     """
     工作日 18:00 执行的任务
     """
     print(f"任务：工作日 18:00 执行。当前时间：{time.ctime()}")
+    workday_facade._finish_work_tasks()
 
 def task_weekday_7pm():
     """
     工作日 19:00 执行的任务
     """
     print(f"任务：工作日 19:00 执行。当前时间：{time.ctime()}")
+    workday_facade._evening_tasks()
 
 def task_weekend_5am():
     """
     休息日 5:00 执行的任务
     """
     print(f"任务：休息日 5:00 执行。当前时间：{time.ctime()}")
+    workday_facade._rest()
 
 scheduler = BackgroundScheduler()
 
@@ -84,8 +94,61 @@ def shutdown_event():
     scheduler.shutdown()
     print("APScheduler 关闭")
 
-@app.get("/")
-async def read_root():
+
+
+@app.get("/receive")
+async def receive():
+    receive_task()
     return {"message": "FastAPI and APScheduler configured."}
 
-# 运行命令: uvicorn main:app --reload
+
+@app.get("/complete")
+async def complete():
+    complete_task()
+    return {"message": "FastAPI and APScheduler configured."}
+
+
+
+@app.get("/list_tasks")
+async def list_tasks():
+    list_all_tasks()
+    return {"message": "FastAPI and APScheduler configured."}
+
+
+
+if __name__ == "__main__":
+    # 这是一个标准的 Python 入口点惯用法
+    # 当脚本直接运行时 (__name__ == "__main__")，这里的代码会被执行
+    # 当通过 python -m YourPackageName 执行 __main__.py 时，__name__ 也是 "__main__"
+    import argparse
+    import uvicorn
+
+    parser = argparse.ArgumentParser(
+        description="Start a simple HTTP server similar to http.server."
+    )
+    parser.add_argument(
+        'port',
+        metavar='PORT',
+        type=int,
+        nargs='?', # 端口是可选的
+        default=8020,
+        help='Specify alternate port [default: 8000]'
+    )
+
+    parser.add_argument(
+        '--is-server',
+        action='store_true', # 如果命令行中包含 --is-server，则将 args.is_server 设置为 True
+        help='Set the server status for the receive function to True'
+    )
+
+    args = parser.parse_args()
+    app.state.is_server_status = args.is_server
+
+    # 使用 uvicorn.run() 来启动服务器
+    # 参数对应于命令行选项
+    uvicorn.run(
+        app,
+        host="0.0.0.0",
+        port=args.port,
+        reload=False  # 启用热重载
+    )

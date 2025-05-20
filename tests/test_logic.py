@@ -55,6 +55,7 @@ class ScriptTaskExecutionStrategy(TaskExecutionStrategy):
 
 
 class PersonTaskExecutionStrategy(TaskExecutionStrategy):
+
     def execute(self, task_context):
         print(f"Inside PersonTaskExecutionStrategy.execute for '{task_context.name}'. Running script...")
         print('\n\n')
@@ -62,37 +63,8 @@ class PersonTaskExecutionStrategy(TaskExecutionStrategy):
         print(task_context.name,'ccvvv')
         try:
             # 注意：安全问题！这里只是示例，实际应用中需要谨慎处理
-            task_type = judge_type(task_context.name)
-
-            if task_type == "代码与练习":
-                edit_coder(task)
-            elif task_type == "实验与学习":
-                test_and_study(task)
-            elif task_type == "整理与优化":
-                clean_and_update(task)
-            elif task_type == "设计":
-                design(task)
-            elif task_type == "开会与对齐":
-                meeting_and_talk(task)
-            else:
-                print('新的类别')
-                meeting_and_talk(task) # 默认处理方式
-
-            task_result = Display.display_dialog("判断", f"任务是否完成: ", buttons='"complete","blockage"', button_cancel=True)
-            if task_result == 'complete':
-                # 移动到完成池
-                pass
-            elif task_result == 'blockage':
-                # TODO 任务阻塞处理
-                # 移动到阻塞池
-                pass
-            elif task_result == 'no complete':
-                # 缩小时间
-                # 移动到就绪池
-                pass
-
-            else:
-                print('ok')
+            # 执行动作
+            pass
 
             if task_context.script_code:
                 # Execute the script code
@@ -105,6 +77,7 @@ class PersonTaskExecutionStrategy(TaskExecutionStrategy):
             # Or we could return a special error message and let the State decide how to handle it.
             # For simplicity now, just return the error message.
             return f"脚本任务 '{task_context.name}' 执行失败：{e}"
+
 
 
 ##################
@@ -219,7 +192,7 @@ class TaskManager:
         elif task_type == 'script':
             strategy = ScriptTaskExecutionStrategy()
         elif task_type == 'person':
-            strategy = PersonTaskExecutionStrategy()
+            strategy = PersonTaskExecutionStrategy()  
         else:
             strategy = PromptTaskExecutionStrategy() # Default
         new_task = Task(name=task_name, execution_strategy=strategy, script_code=script_code)

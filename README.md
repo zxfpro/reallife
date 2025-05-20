@@ -34,3 +34,5 @@ pytest test_example.py::test_add
 
 运行失败的测试 | pytest --lf 
 查看详细输出  | pytest -v 
+
+python -m reallife.server

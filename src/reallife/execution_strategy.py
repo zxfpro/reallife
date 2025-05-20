@@ -1,100 +1,75 @@
 from .abstra import TaskExecutionStrategy
 
+from appscriptz.main import APPManager
+import requests
 
-# 具体策略：提示任务执行策略
+apps = APPManager()
+
+def sync_weight(date)->str:
+    """
+    同步体重
+    """
+
+    url = f"http://101.201.244.227:8000/weight/{date}"
+    response = requests.get(url)
+    result = response.json().get('weight')
+    x = f"""---
+番茄: 14
+体重: {result}
+---
+"""
+
+    with open(self.main_path + f'/日记/{date}.md','a') as f:
+        f.write(x)
+    return 'success'
+
+# 具体策略：提示任务执行策略 (人工执行)
 class PromptTaskExecutionStrategy(TaskExecutionStrategy):
     def execute(self, task_context):
-        # Prompt 任务的执行就是返回状态提示，但这个方法现在主要由 State 调用
+        # 对于 Prompt 任务，execute 方法主要被 State 调用以获取提示
         # handle() 方法是 State 模式中获取提示的地方
-        print(f"Inside PromptTaskExecutionStrategy.execute for '{task_context.name}'. This is called by State.")
+        # print(f"Inside PromptTaskExecutionStrategy.execute for '{task_context.name}'. Called by State.")
+        # 返回状态提供的提示
         return task_context._state.handle(task_context)
+    
 
-# 具体策略：脚本任务执行策略
-class ScriptTaskExecutionStrategy(TaskExecutionStrategy):
+# 具体策略：自动任务执行策略 (电脑自动执行)
+class AutomaticTaskExecutionStrategy(TaskExecutionStrategy):
     def execute(self, task_context):
-        print(f"Inside ScriptTaskExecutionStrategy.execute for '{task_context.name}'. Running script...")
-        print('\n\n')
-        print(task_context,'task_context') # <__main__.Task object at 0x102bdfd90> task_context
-        print(task_context.name,'ccvvv')
+        print(f"Inside AutomaticTaskExecutionStrategy.execute for '{task_context.name}'. Running automatic task...")
         try:
-            # 注意：安全问题！这里只是示例，实际应用中需要谨慎处理
-
-            if task_context.name == '汇总到预备池':
-                pass
+            # 这里模拟自动任务的执行逻辑
+            # 实际应用中，这里会调用外部服务、执行脚本、处理数据等
+            # if task_context.script_code:
+            if task_context.name == '同步体重':
+                print('已同步体重')
+            elif task_context.name == '汇总到预备池':
+                print('已汇总到预备池')
             elif task_context.name == '同步到就绪池':
-                pass
+                print('已同步到就绪池')
             elif task_context.name == '同步到执行池':
-                pass
+                print('已同步到执行池')
             elif task_context.name == '同步到日历':
-                pass
+                print('已同步到日历')
             elif task_context.name == '同步到备忘录':
-                pass
-            elif task_context.name == '同步体重':
-                pass
-
-
-            if task_context.script_code:
-                # Execute the script code
-                exec(task_context.script_code)
-                return f"脚本任务 '{task_context.name}' 执行完毕。"
-            else:
-                 return f"脚本任务 '{task_context.name}' 没有提供脚本代码。"
-        except Exception as e:
-            # The state transition on failure would need to be handled by the caller (e.g., TodoState.complete)
-            # Or we could return a special error message and let the State decide how to handle it.
-            # For simplicity now, just return the error message.
-            return f"脚本任务 '{task_context.name}' 执行失败：{e}"
-
-
-
-class PersonTaskExecutionStrategy(TaskExecutionStrategy):
-    def execute(self, task_context):
-        print(f"Inside PersonTaskExecutionStrategy.execute for '{task_context.name}'. Running script...")
-        print('\n\n')
-        print(task_context,'task_context') # <__main__.Task object at 0x102bdfd90> task_context
-        print(task_context.name,'ccvvv')
-        try:
-            # 注意：安全问题！这里只是示例，实际应用中需要谨慎处理
-            task_type = judge_type(task_context.name)
-
-            if task_type == "代码与练习":
-                edit_coder(task)
-            elif task_type == "实验与学习":
-                test_and_study(task)
-            elif task_type == "整理与优化":
-                clean_and_update(task)
-            elif task_type == "设计":
-                design(task)
-            elif task_type == "开会与对齐":
-                meeting_and_talk(task)
-            else:
-                print('新的类别')
-                meeting_and_talk(task) # 默认处理方式
-
-            task_result = Display.display_dialog("判断", f"任务是否完成: ", buttons='"complete","blockage"', button_cancel=True)
-            if task_result == 'complete':
-                # 移动到完成池
-                pass
-            elif task_result == 'blockage':
-                # TODO 任务阻塞处理
-                # 移动到阻塞池
-                pass
-            elif task_result == 'no complete':
-                # 缩小时间
-                # 移动到就绪池
-                pass
-
-            else:
-                print('ok')
+                print('已同步到备忘录')
+                apps.memorandum2notes('已同步到备忘录')
+            elif task_context.name == '同步体重 (收工)':
+                print('同步体重 (收工)')
+            elif task_context.name == '同步到备忘录 (收工)':
+                print("同步到备忘录 (收工)")
+                apps.memorandum2notes('同步到备忘录 (收工)')
 
             if task_context.script_code:
-                # Execute the script code
-                exec(task_context.script_code)
-                return f"脚本任务 '{task_context.name}' 执行完毕。"
+                # 模拟执行脚本
+                print(f"Automatic task '{task_context.name}' executed successfully.")
+                # 模拟执行成功
+                return {"status": "success", "message": f"自动任务 '{task_context.name}' 执行完毕。"}
             else:
-                 return f"脚本任务 '{task_context.name}' 没有提供脚本代码。"
+                print(f"Automatic task '{task_context.name}' has no script code.")
+                # 模拟执行成功 (没有代码也算执行成功)
+                return {"status": "success", "message": f"自动任务 '{task_context.name}' 没有提供脚本代码，但标记为完成。"}
         except Exception as e:
-            # The state transition on failure would need to be handled by the caller (e.g., TodoState.complete)
-            # Or we could return a special error message and let the State decide how to handle it.
-            # For simplicity now, just return the error message.
-            return f"脚本任务 '{task_context.name}' 执行失败：{e}"
+            print(f"Automatic task '{task_context.name}' execution failed: {e}")
+            # 模拟执行失败
+            return {"status": "failure", "message": f"自动任务 '{task_context.name}' 执行失败：{e}"}
