@@ -94,26 +94,48 @@ def shutdown_event():
     scheduler.shutdown()
     print("APScheduler 关闭")
 
+def adapter(text):
+    import re
+    # 使用正则表达式匹配 "当前任务：" 后面的内容，直到第一个空格或括号
+    regex = r"当前任务：(.*?)(?:\s|\()"
+    regex = r"当前任务：(.*?)(?:\n|$)"
+    match = re.search(regex, text)
 
+    if match:
+        task_name = match.group(1)
+        return task_name
+    else:
+        print(f'提取失败: -> {text}')
+        return text
 
 @app.get("/receive")
 async def receive():
-    receive_task()
-    return {"message": "FastAPI and APScheduler configured."}
+    result = receive_task()
+    return {"message": adapter(result)}
 
 
 @app.get("/complete")
 async def complete():
-    complete_task()
-    return {"message": "FastAPI and APScheduler configured."}
-
+    result = complete_task()
+    return {"message": adapter(result)}
 
 
 @app.get("/list_tasks")
 async def list_tasks():
-    list_all_tasks()
+    result = list_all_tasks()
+    return {"message": result}
+
+
+@app.get("/morning")
+async def morning():
+    result = workday_facade._morning_tasks()
+    print(result)
     return {"message": "FastAPI and APScheduler configured."}
 
+@app.get("/clear")
+async def clear():
+    workday_facade.clear()
+    return {"message": "FastAPI and APScheduler configured."}
 
 
 if __name__ == "__main__":

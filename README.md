@@ -25,14 +25,6 @@ uv publish
 bash run_test.sh
 ```
 
-### 
 
-@pytest.mark.slow
-pytest -m slow # 运行带有 `slow` 标记的测试
-pytest -m "not slow"  # 运行不带有 `slow` 标记的测试
-pytest test_example.py::test_add
 
-运行失败的测试 | pytest --lf 
-查看详细输出  | pytest -v 
-
-python -m reallife.server
+python -m src.reallife.server

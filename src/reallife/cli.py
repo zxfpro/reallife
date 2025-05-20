@@ -9,9 +9,10 @@ workday_facade = WorkdayFacade()
 
 def receive_task():
     """获取当前任务信息、状态和提示。不触发脚本执行。"""
-    print("\n执行动作 1: receive (获取当前任务信息和提示)")
-    # receive 函数只获取信息和提示，不触发脚本执行 (Automatic 脚本在 complete Todo 时执行)
-    print(workday_facade.get_current_task_info())
+    result = workday_facade.get_current_task_info()
+    print(result)
+    return result
+
 
 def complete_task():
     """
@@ -19,22 +20,26 @@ def complete_task():
     如果当前任务是待办脚本任务，将触发脚本执行并根据结果更新状态。
     完成任务后，获取下一个任务信息并返回。
     """
-    print("\n执行动作 2: complete (完成当前任务)")
-    # complete 函数会完成当前任务，如果当前是待办 Automatic 任务，会触发脚本执行
-    # 完成后，会显示下一个任务的信息
-    print(workday_facade.complete_current_task())
-    # list_tasks() # Optional: display updated list after each completion
-
+    result = workday_facade.complete_current_task()
+    print(result)
+    return result
 def list_all_tasks():
      """列出所有任务及其状态"""
-     print("\n--- 所有任务状态 ---")
+     context = ""
+     context += "\n--- 所有任务状态 ---" 
+     context += "\n"
      tasks_list = workday_facade.get_all_tasks_status()
      if not tasks_list:
-         print("当前没有任务。")
+         context += "当前没有任务。"
+         context += "\n"
          return
      for name, status in tasks_list:
-         print(f"- {name}: {status}")
-     print("---------------------")
+         context += f"- {name}: {status}"
+         context += "\n"
+     context += "---------------------"
+     context += "\n"
+     print(context)
+     return context
 
 def show_help():
     print("\n可用动作：")
