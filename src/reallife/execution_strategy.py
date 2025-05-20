@@ -2,6 +2,7 @@ from .abstra import TaskExecutionStrategy
 
 from appscriptz.main import APPManager
 import requests
+from kanbanz import
 
 apps = APPManager()
 
